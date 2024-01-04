@@ -1,4 +1,5 @@
 <?php
+
 /**
  *------
  * BGA framework: Gregory Isabelli & Emmanuel Colin & BoardGameArena
@@ -23,9 +24,9 @@
  * Note: if the HTML of your game interface is always the same, you don't have to place anything here.
  *
  */
-  
-require_once( APP_BASE_PATH."view/common/game.view.php" );
-  
+
+require_once(APP_BASE_PATH . "view/common/game.view.php");
+
 class view_mate_mate extends game_view
 {
     protected function getGameName()
@@ -33,14 +34,32 @@ class view_mate_mate extends game_view
         // Used for translations and stuff. Please do not modify.
         return "mate";
     }
-    
-  	function build_page( $viewArgs )
-  	{		
-  	    // Get players & players number
+
+    function build_page($viewArgs)
+    {
+        // Get players & players number
         $players = $this->game->loadPlayersBasicInfos();
-        $players_nbr = count( $players );
+        $players_nbr = count($players);
 
         /*********** Place your code below:  ************/
+
+        $template = self::getGameName() . "_" . self::getGameName();
+
+        $directions = array('N', 'S');
+
+        // this will inflate our player block with actual players data
+        $this->page->begin_block($template, "playerhandblock");
+        foreach ($players as $player_id => $info) {
+            $dir = array_shift($directions);
+            $this->page->insert_block("playerhandblock", array(
+                "PLAYER_ID" => $player_id,
+                "PLAYER_NAME" => $players[$player_id]['player_name'],
+                "PLAYER_COLOR" => $players[$player_id]['player_color'],
+                "DIR" => $dir
+            ));
+        }
+        // this will make our My Hand text translatable
+        $this->tpl['MY_HAND'] = self::_("My hand");
 
 
         /*
@@ -57,7 +76,7 @@ class view_mate_mate extends game_view
         $this->tpl['MY_VARIABLE_ELEMENT'] = self::raw( $some_html_code );
         
         */
-        
+
         /*
         
         // Example: display a specific HTML block for each player in this game.
@@ -82,5 +101,5 @@ class view_mate_mate extends game_view
 
 
         /*********** Do not change anything below this line  ************/
-  	}
+    }
 }

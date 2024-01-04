@@ -42,31 +42,32 @@
            Consequently, don't hesitate to put as many comments as necessary.
 */
 
-
 /* Note: you must not use any @import directive */
-
 
 /********* You can start writing your CSS below this line: **********/
 
+/** Table layout **/
 
-/*
-    Example of CSS sprites (a black token and a white token, 20x20px each, embedded in the same "tokens.png" 40x20px image):
+#playertables {
+  position: relative;
+  width: 800px;
+  height: 340px;
+}
 
-    .white_token {
-        background-image: url('img/tokens.png');
-        background-position: 0px 0px;
-    }
-    .black_token {
-        background-image: url('img/tokens.png');
-        background-position: -20px 0px;
-    }
-    .token {
-        width: 20px;
-        height: 20px;
-        background-repeat: none;
-    }
-*/
+.playertablename {
+  font-weight: bold;
+}
 
+.playertable {
+  text-align: center;
+  width: 800px;
+  height: 110px;
+}
 
-
-
+.playertablecard {
+  display: inline-block;
+  position: relative;
+  margin-top: 5px;
+  width: 72px;
+  height: 96px;
+}
