@@ -71,3 +71,12 @@
   width: 72px;
   height: 96px;
 }
+
+/*** cards on table ***/
+
+.cardontable {
+  position: absolute;
+  width: 72px;
+  height: 96px;
+  background-image: url("img/cards.jpg");
+}
