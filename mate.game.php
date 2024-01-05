@@ -91,11 +91,8 @@ class Mate extends Table
         $cards = array();
         foreach ($this->suits as $suit_id => $suit) {
             // spade, heart, diamond, club
-            for ($value = 7; $value <= 14; $value++) {
-                if ($value == 7 || $value == 10 || $value >= 12) {
-                    //  7, 10, Q, K, A
-                    $cards[] = array('type' => $suit_id, 'type_arg' => $value, 'nbr' => 1);
-                }
+            foreach ($this->values_label as $value => $value_label) {
+                $cards[] = array('type' => $suit_id, 'type_arg' => $value, 'nbr' => 1);
             }
         }
 
@@ -171,8 +168,6 @@ class Mate extends Table
     /*
         In this space, you can put any utility methods useful for your game logic
     */
-
-
 
     //////////////////////////////////////////////////////////////////////////////
     //////////// Player actions
