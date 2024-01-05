@@ -1,4 +1,5 @@
 <?php
+
 /**
  *------
  * BGA framework: Gregory Isabelli & Emmanuel Colin & BoardGameArena
@@ -20,29 +21,23 @@
  * this.ajaxcall( "/mate/mate/myAction.html", ...)
  *
  */
-  
-  
-  class action_mate extends APP_GameAction
-  { 
-    // Constructor: please do not modify
-   	public function __default()
-  	{
-  	    if( self::isArg( 'notifwindow') )
-  	    {
-            $this->view = "common_notifwindow";
-  	        $this->viewArgs['table'] = self::getArg( "table", AT_posint, true );
-  	    }
-  	    else
-  	    {
-            $this->view = "mate_mate";
-            self::trace( "Complete reinitialization of board game" );
-      }
-  	} 
-  	
-  	// TODO: defines your action entry points there
 
 
-    /*
+class action_mate extends APP_GameAction
+{
+  // Constructor: please do not modify
+  public function __default()
+  {
+    if (self::isArg('notifwindow')) {
+      $this->view = "common_notifwindow";
+      $this->viewArgs['table'] = self::getArg("table", AT_posint, true);
+    } else {
+      $this->view = "mate_mate";
+      self::trace("Complete reinitialization of board game");
+    }
+  }
+
+  /*
     
     Example:
   	
@@ -63,6 +58,11 @@
     
     */
 
+  public function playCard()
+  {
+    self::setAjaxMode();
+    $card_id = self::getArg("id", AT_posint, true);
+    $this->game->playCard($card_id);
+    self::ajaxResponse();
   }
-  
-
+}
