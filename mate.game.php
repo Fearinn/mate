@@ -39,15 +39,6 @@ class Mate extends Table
 
         $this->cards = self::getNew("module.common.deck");
         $this->cards->init("card");
-
-        self::initGameStateLabels(array(
-            //    "my_first_global_variable" => 10,
-            //    "my_second_global_variable" => 11,
-            //      ...
-            //    "my_first_game_variant" => 100,
-            //    "my_second_game_variant" => 101,
-            //      ...
-        ));
     }
 
     protected function getGameName()
