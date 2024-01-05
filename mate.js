@@ -203,15 +203,15 @@ define([
 
     // Get card unique identifier based on its suit and value
     getCardUniqueId: function (suit, value) {
-      return (suit - 1) * 10 + (value - 2);
+      return (suit - 1) * 13 + (value - 2);
     },
 
-    playCardOnTable: function (player_id, color, value, card_id) {
+    playCardOnTable: function (player_id, suit, value, card_id) {
       // player_id => direction
       dojo.place(
         this.format_block("jstpl_cardontable", {
           x: this.cardwidth * (value - 2),
-          y: this.cardheight * (color - 1),
+          y: this.cardheight * (suit - 1),
           player_id: player_id,
         }),
         "playertablecard_" + player_id
