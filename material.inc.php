@@ -54,10 +54,10 @@ $this->suits = array(
 
 $this->suits_strength = array(
   // clubs > spades > hearts > diamonds
-  1 => 2,
-  2 => 3,
-  3 => 1,
-  4 => 4
+  1 => 3,
+  2 => 2,
+  3 => 4,
+  4 => 1
 );
 
 $this->values_label = array(
