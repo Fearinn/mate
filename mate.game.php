@@ -35,6 +35,7 @@ class Mate extends Table
 
         self::initGameStateLabels(array(
             "trickSuit" => 11,
+            "trickValue" => 12,
         ));
 
         $this->cards = self::getNew("module.common.deck");
@@ -81,6 +82,8 @@ class Mate extends Table
 
         // Set current trick suit to zero (= no trick suit)
         self::setGameStateInitialValue('trickSuit', 0);
+
+        self::setGameStateInitialValue('trickValue', 0);
 
         // Init game statistics
         // (note: statistics used in this file must be defined in your stats.inc.php file)
@@ -204,6 +207,36 @@ class Mate extends Table
     
     */
 
+    function playCard($card_id)
+    {
+        self::checkAction("playCard");
+        $player_id = self::getActivePlayerId();
+        $this->cards->moveCard($card_id, 'cardsontable', $player_id);
+
+        $currentCard = $this->cards->getCard($card_id);
+        $currentTrickSuit = self::getGameStateValue('trickSuit');
+        $currentTrickValue = self::getGameStateValue('trickValue');
+
+        if (!$currentTrickSuit || !$currentTrickValue) {
+            self::setGameStateValue('trickSuit', $currentCard['type']);
+            self::setGameStateValue('trickValue', $currentCard['type_arg']);
+        }
+
+        if ($currentTrickSuit && $currentCard && $currentTrickSuit != $currentCard['type'] && $currentCard['type_arg'] != $currentTrickValue)
+            throw new BgaVisibleSystemException("You can't play this card now");
+
+        // And notify
+        self::notifyAllPlayers('playCard', clienttranslate('${player_name} plays ${value_displayed} ${suit_displayed}'), array(
+            'i18n' => array('suit_displayed', 'value_displayed'), 'card_id' => $card_id, 'player_id' => $player_id,
+            'player_name' => self::getActivePlayerName(), 'value' => $currentCard['type_arg'],
+            'value_displayed' => $this->values_label[$currentCard['type_arg']], 'suit' => $currentCard['type'],
+            'suit_displayed' => $this->suits[$currentCard['type']]['name']
+        ));
+
+        // Next player
+        $this->gamestate->nextState('playCard');
+    }
+
 
     //////////////////////////////////////////////////////////////////////////////
     //////////// Game state arguments
@@ -253,6 +286,72 @@ class Mate extends Table
         $this->gamestate->nextState( 'some_gamestate_transition' );
     }    
     */
+
+    function stNewHand()
+    {
+        $players = self::loadPlayersBasicInfos();
+
+        foreach ($players as $player_id => $player) {
+            $this->cards->moveAllCardsInLocation('cardsontable', 'hand', $player_id, $player_id);
+        }
+
+
+        foreach ($players as $player_id => $player) {
+            $cards = $this->cards->getPlayerHand($player_id);
+            // Notify player about his cards
+            self::notifyPlayer($player_id, 'newHand', '', array('cards' => $cards));
+        }
+
+        $this->gamestate->nextState("");
+    }
+
+    function stNewTrick()
+    {
+        // New trick: active the player who wins the last trick
+        // Reset trick suit and trick value to 0 (= no suit and no value)
+        self::setGameStateInitialValue('trickSuit', 0);
+        self::setGameStateInitialValue('trickValue', 0);
+        $this->gamestate->nextState("");
+    }
+
+    function stNextPlayer()
+    {
+        // Active next player OR end the trick and go to the next trick OR end the hand
+        if ($this->cards->countCardInLocation('cardsontable') > 0 && $this->cards->countCardInLocation('cardsontable') % 2 == 0) {
+
+            $best_value_player_id = self::activeNextPlayer();
+            $this->cards->moveAllCardsInLocation('cardsontable', 'cardswon', null, $best_value_player_id);
+
+            // Notify
+            $players = self::loadPlayersBasicInfos();
+            self::notifyAllPlayers('trickWin', clienttranslate('${player_name} wins the trick'), array(
+                'player_id' => $best_value_player_id,
+                'player_name' => $players[$best_value_player_id]['player_name']
+            ));
+
+            if ($this->cards->countCardInLocation('hand') == 0) {
+                // End of the hand
+                $this->gamestate->nextState("endHand");
+            } else {
+                // End of the trick
+
+                $this->gamestate->nextState("nextTrick");
+            }
+        } else {
+            // Standard case (not the end of the trick)
+            // => just active the next player
+            $player_id = self::activeNextPlayer();
+            self::giveExtraTime($player_id);
+            $this->gamestate->nextState('nextPlayer');
+        }
+    }
+
+
+    function stEndHand()
+    {
+
+        $this->gamestate->nextState("newHand");
+    }
 
     //////////////////////////////////////////////////////////////////////////////
     //////////// Zombie

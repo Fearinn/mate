@@ -262,22 +262,28 @@ define([
       var items = this.playerHand.getSelectedItems();
 
       if (items.length > 0) {
-        if (this.checkAction("playCard", true)) {
+        var action = "playCard";
+        if (this.checkAction(action, true)) {
           // Can play a card
-
           var card_id = items[0].id;
-          console.log("on playCard " + card_id);
-
-          // type is (suit - 1) * 13 + (value - 2)
-          var type = items[0].type;
-          var suit = Math.floor(type / 13) + 1;
-          var value = (type % 13) + 2;
-
-          this.playCardOnTable(this.player_id, suit, value, card_id);
+          this.ajaxcall(
+            "/" +
+              this.game_name +
+              "/" +
+              this.game_name +
+              "/" +
+              action +
+              ".html",
+            {
+              id: card_id,
+              lock: true,
+            },
+            this,
+            function (result) {},
+            function (is_error) {}
+          );
 
           this.playerHand.unselectAll();
-        } else if (this.checkAction("giveCards")) {
-          // Can give cards => let the player select some cards
         } else {
           this.playerHand.unselectAll();
         }
@@ -332,9 +338,6 @@ define([
         */
     setupNotifications: function () {
       console.log("notifications subscriptions setup");
-
-      // TODO: here, associate your game notifications with local methods
-
       // Example 1: standard notification handling
       // dojo.subscribe( 'cardPlayed', this, "notif_cardPlayed" );
 
@@ -345,9 +348,6 @@ define([
       // this.notifqueue.setSynchronous( 'cardPlayed', 3000 );
       //
     },
-
-    // TODO: from this point and below, you can write your game notifications handling methods
-
     /*
         Example:
         
@@ -362,5 +362,39 @@ define([
         },    
         
         */
+
+    setupNotifications: function () {
+      console.log("notifications subscriptions setup");
+
+      dojo.subscribe("newHand", this, "notif_newHand");
+      dojo.subscribe("playCard", this, "notif_playCard");
+      dojo.subscribe("trickWin", this, "notif_trickWin");
+    },
+
+    notif_newHand: function (notif) {
+      this.playerHand.removeAll();
+
+      for (var i in notif.args.cards) {
+        var card = notif.args.cards[i];
+        var suit = card.type;
+        var value = card.type_arg;
+        this.playerHand.addToStockWithId(
+          this.getCardUniqueId(suit, value),
+          card.id
+        );
+      }
+    },
+
+    notif_playCard: function (notif) {
+      // Play a card on the table
+      this.playCardOnTable(
+        notif.args.player_id,
+        notif.args.suit,
+        notif.args.value,
+        notif.args.card_id
+      );
+    },
+
+    notif_trickWin: function (notif) {},
   });
 });
