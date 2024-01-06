@@ -317,13 +317,38 @@ class Mate extends Table
     function stNextPlayer()
     {
         // Active next player OR end the trick and go to the next trick OR end the hand
-        if ($this->cards->countCardInLocation('cardsontable') > 0 && $this->cards->countCardInLocation('cardsontable') % 2 == 0) {
+        if ($this->cards->countCardInLocation('cardsontable') == 2) {
+            // This is the end of the trick
+            $cards_on_table = $this->cards->getCardsInLocation('cardsontable');
+            $best_value_player_id = null;
+            $currentTrickSuit = self::getGameStateValue('trickSuit');
+            $currentTrickValue = self::getGameStateValue('trickValue');
 
-            $best_value_player_id = self::activeNextPlayer();
-            $this->cards->moveAllCardsInLocation('cardsontable', 'cardswon', null, $best_value_player_id);
+            foreach ($cards_on_table as $card) {
+                // Note: type = card suit
+                if ($card['type'] == $currentTrickSuit) {
+                    $card_value_strength = $this->values_strength[$card['type_arg']];
+                    if ($best_value_player_id === null || $card_value_strength > $currentTrickValue) {
+                        $best_value_player_id = $card['location_arg']; // Note: location_arg = player who played this card on table
+                    }
+                } else {
+                    $card_suit_strength = $this->suits_strength[$card['type']];
+                    if ($best_value_player_id === null || $card_suit_strength > $currentTrickSuit) {
+                        $best_value_player_id = $card['location_arg'];
+                    }
+                }
+            }
+
+            $players = self::loadPlayersBasicInfos();
+
+            foreach ($players as $player_id => $player) {
+                $this->cards->moveAllCardsInLocation('cardsontable', 'temporary', $player_id, $player_id);
+            }
+
+            // Active this player => he's the one who starts the next trick
+            $this->gamestate->changeActivePlayer($best_value_player_id);
 
             // Notify
-            $players = self::loadPlayersBasicInfos();
             self::notifyAllPlayers('trickWin', clienttranslate('${player_name} wins the trick'), array(
                 'player_id' => $best_value_player_id,
                 'player_name' => $players[$best_value_player_id]['player_name']
