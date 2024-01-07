@@ -49,9 +49,11 @@
 /** Table layout **/
 
 #playertables {
+  display: flex;
   position: relative;
+  gap: 1rem;
+  justify-content: center;
   width: 800px;
-  height: 340px;
 }
 
 .playertablename {
@@ -60,7 +62,7 @@
 
 .playertable {
   text-align: center;
-  width: 800px;
+  width: 100px;
   height: 110px;
 }
 
@@ -79,4 +81,9 @@
   width: 72px;
   height: 96px;
   background-image: url("img/cards.jpg");
+}
+
+.history {
+  width: 800px;
+  height: 110px;
 }

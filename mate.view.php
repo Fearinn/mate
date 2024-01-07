@@ -61,6 +61,17 @@ class view_mate_mate extends game_view
         // this will make our My Hand text translatable
         $this->tpl['MY_HAND'] = self::_("My hand");
 
+        $this->page->begin_block($template, "historyblock");
+        foreach ($players as $player_id => $info) {
+            $dir = array_shift($directions);
+            $this->page->insert_block("historyblock", array(
+                "PLAYER_ID" => $player_id,
+                "PLAYER_NAME" => $players[$player_id]['player_name'],
+                "PLAYER_COLOR" => $players[$player_id]['player_color'],
+            ));
+        }
+
+        $this->tpl['PREVIOUSLY PLAYED CARDS'] = self::_("Previously played cards");
 
         /*
         

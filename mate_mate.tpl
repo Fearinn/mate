@@ -9,7 +9,6 @@
 -- See http://en.boardgamearena.com/#!doc/Studio for more information.
 -------
 -->
-
 <div id="playertables">
   <!-- BEGIN playerhandblock -->
   <div class="playertable whiteblock playertable_{DIR}">
@@ -19,6 +18,16 @@
     <div class="playertablecard" id="playertablecard_{PLAYER_ID}"></div>
   </div>
   <!-- END playerhandblock -->
+</div>
+
+<div id="histories">
+  <h3>{PREVIOUSLY PLAYED CARDS}</h3>
+  <!-- BEGIN historyblock -->
+  <div id="history_{PLAYER_ID}" class="history whiteblock">
+    <h4 class="historyname" style="color: #{PLAYER_COLOR}">{PLAYER_NAME}</h4>
+    <div class="historycard" id="historycard_{PLAYER_ID}"></div>
+  </div>
+  <!-- END historyblock -->
 </div>
 
 <div id="myhand_wrap" class="whiteblock">

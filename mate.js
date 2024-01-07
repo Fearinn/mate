@@ -21,6 +21,7 @@ define([
   "ebg/core/gamegui",
   "ebg/counter",
   "ebg/stock",
+  "ebg/zone",
 ], function (dojo, declare) {
   return declare("bgagame.mate", ebg.core.gamegui, {
     constructor: function () {
@@ -51,6 +52,7 @@ define([
       console.log("Starting game setup");
 
       this.playerHand = new ebg.stock(); // new stock object for hand
+
       this.playerHand.create(
         this,
         $("myhand"),
@@ -59,6 +61,19 @@ define([
       );
 
       this.playerHand.image_items_per_row = 13; // 13 images per row
+
+      for (var player_id in gamedatas.players) {
+        this["history_" + player_id] = new ebg.zone();
+
+        this["history_" + player_id].create(
+          this,
+          $("history_" + player_id),
+          this.cardwidth,
+          this.cardheight
+        );
+
+        this["history_" + player_id].setPattern("horizontalfit");
+      }
 
       // Create cards types:
       for (var suit = 1; suit <= 4; suit++) {
