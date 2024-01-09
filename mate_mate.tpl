@@ -22,25 +22,31 @@
 
 <div id="histories">
   <h3>{PREVIOUSLY PLAYED CARDS}</h3>
-  <!-- BEGIN historyblock -->
-  <div id="history_{PLAYER_ID}" class="history whiteblock">
-    <h4 class="historyname" style="color: #{PLAYER_COLOR}">{PLAYER_NAME}</h4>
-    <div class="historycard" id="historycard_{PLAYER_ID}"></div>
+  <div class="whiteblock">
+    <div id="historycards" class="historycards">
+    <!-- BEGIN historycardsblock -->
+      <div class="historycard historycard_{DIR}" id="historycard_{PLAYER_ID}{NUM}" style="border-color: #{PLAYER_COLOR}"></div>
+    <!-- END historycardsblock -->
+    </div>
   </div>
-  <!-- END historyblock -->
 </div>
 
-<div id="myhand_wrap" class="whiteblock">
-  <h3>{MY_HAND}</h3>
-  <div id="myhand"></div>
-</div>
+  <div id="myhand_wrap" class="whiteblock">
+    <h3>{MY_HAND}</h3>
+    <div id="myhand"></div>
+  </div>
 
-<script type="text/javascript">
-  // Javascript HTML templates
+  <script type="text/javascript">
+    // Javascript HTML templates
 
-  var jstpl_cardontable =
-    '<div class="cardontable" id="cardontable_${player_id}" style="background-position:-${x}px -${y}px">\
+    var jstpl_cardontable =
+      '<div class="cardontable" id="cardontable_${player_id}" style="background-position:-${x}px -${y}px">\
                         </div>';
-</script>
 
-{OVERALL_GAME_FOOTER}
+    var jstpl_cardonhistory =
+      '<div class="cardonhistory" id="cardonhistory_${player_id}" style="background-position:-${x}px -${y}px">\
+                        </div>';
+  </script>
+
+  {OVERALL_GAME_FOOTER}
+</div>

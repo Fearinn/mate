@@ -41,6 +41,7 @@ class view_mate_mate extends game_view
         $players = $this->game->loadPlayersBasicInfos();
         $players_nbr = count($players);
 
+
         /*********** Place your code below:  ************/
 
         $template = self::getGameName() . "_" . self::getGameName();
@@ -50,25 +51,27 @@ class view_mate_mate extends game_view
         // this will inflate our player block with actual players data
         $this->page->begin_block($template, "playerhandblock");
         foreach ($players as $player_id => $info) {
-            $dir = array_shift($directions);
+
             $this->page->insert_block("playerhandblock", array(
                 "PLAYER_ID" => $player_id,
                 "PLAYER_NAME" => $players[$player_id]['player_name'],
                 "PLAYER_COLOR" => $players[$player_id]['player_color'],
-                "DIR" => $dir
             ));
         }
         // this will make our My Hand text translatable
         $this->tpl['MY_HAND'] = self::_("My hand");
 
-        $this->page->begin_block($template, "historyblock");
+        $this->page->begin_block($template, "historycardsblock");
         foreach ($players as $player_id => $info) {
             $dir = array_shift($directions);
-            $this->page->insert_block("historyblock", array(
-                "PLAYER_ID" => $player_id,
-                "PLAYER_NAME" => $players[$player_id]['player_name'],
-                "PLAYER_COLOR" => $players[$player_id]['player_color'],
-            ));
+            for ($i = 1; $i <= 10; $i++) {
+                $this->page->insert_block("historycardsblock", array(
+                    "PLAYER_ID" => $player_id,
+                    "NUM" => $i,
+                    "DIR" => $dir,
+                    "PLAYER_COLOR" => $players[$player_id]['player_color'],
+                ));
+            }
         }
 
         $this->tpl['PREVIOUSLY PLAYED CARDS'] = self::_("Previously played cards");

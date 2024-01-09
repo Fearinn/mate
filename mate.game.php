@@ -341,25 +341,29 @@ class Mate extends Table
 
             $players = self::loadPlayersBasicInfos();
 
-            foreach ($players as $player_id => $player) {
-                $this->cards->moveAllCardsInLocation('cardsontable', 'temporary', $player_id, $player_id);
-            }
-
             // Active this player => he's the one who starts the next trick
             $this->gamestate->changeActivePlayer($best_value_player_id);
 
             // Notify
-            self::notifyAllPlayers('trickWin', clienttranslate('${player_name} wins the trick'), array(
-                'player_id' => $best_value_player_id,
-                'player_name' => $players[$best_value_player_id]['player_name']
-            ));
+            foreach ($players as $player_id => $player) {
+                $cards_on_table = $this->cards->getCardsInLocation('cardsontable', $player_id);
+                $card = array_shift($cards_on_table);
 
+                $this->cards->moveAllCardsInLocation('cardsontable', 'temporary', $player_id, $player_id);
+
+                self::notifyAllPlayers('trickWin', clienttranslate('${best_player_name} wins the trick'), array(
+                    'best_player_id' => $best_value_player_id,
+                    'best_player_name' => $players[$best_value_player_id]['player_name'],
+                    'player_id' => $player_id,
+                    'suit' => $card['type'],
+                    'value' => $card['type_arg'],
+                ));
+            }
             if ($this->cards->countCardInLocation('hand') == 0) {
                 // End of the hand
                 $this->gamestate->nextState("endHand");
             } else {
                 // End of the trick
-
                 $this->gamestate->nextState("nextTrick");
             }
         } else {

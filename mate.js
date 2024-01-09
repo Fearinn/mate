@@ -21,7 +21,6 @@ define([
   "ebg/core/gamegui",
   "ebg/counter",
   "ebg/stock",
-  "ebg/zone",
 ], function (dojo, declare) {
   return declare("bgagame.mate", ebg.core.gamegui, {
     constructor: function () {
@@ -33,6 +32,7 @@ define([
 
       this.cardwidth = 72;
       this.cardheight = 96;
+      this.historyqtd = 0;
     },
 
     /*
@@ -61,19 +61,6 @@ define([
       );
 
       this.playerHand.image_items_per_row = 13; // 13 images per row
-
-      for (var player_id in gamedatas.players) {
-        this["history_" + player_id] = new ebg.zone();
-
-        this["history_" + player_id].create(
-          this,
-          $("history_" + player_id),
-          this.cardwidth,
-          this.cardheight
-        );
-
-        this["history_" + player_id].setPattern("horizontalfit");
-      }
 
       // Create cards types:
       for (var suit = 1; suit <= 4; suit++) {
@@ -121,11 +108,7 @@ define([
       // Setting up player boards
       for (var player_id in gamedatas.players) {
         var player = gamedatas.players[player_id];
-
-        // TODO: Setting up players boards if needed
       }
-
-      // TODO: Set up your game interface here, according to "gamedatas"
 
       // Setup game notifications to handle (see "setupNotifications" method below)
       this.setupNotifications();
@@ -257,6 +240,29 @@ define([
         "cardontable_" + player_id,
         "playertablecard_" + player_id
       ).play();
+    },
+
+    moveCardToHistory: function (player_id, suit, value) {
+      this.historyqtd++;
+
+      dojo.place(
+        this.format_block("jstpl_cardonhistory", {
+          x: this.cardwidth * (value - 2),
+          y: this.cardheight * (suit - 1),
+          player_id: player_id,
+        }),
+        "historycard_" + player_id + Math.ceil(this.historyqtd / 2)
+      );
+
+      // In any case: move it to its final destination
+      this.slideToObject(
+        "cardonhistory_" + player_id,
+        "historycard_" + player_id + Math.ceil(this.historyqtd / 2)
+      ).play();
+
+      console.log(this.historyqtd);
+
+      dojo.destroy("cardontable_" + player_id);
     },
 
     ///////////////////////////////////////////////////
@@ -410,6 +416,12 @@ define([
       );
     },
 
-    notif_trickWin: function (notif) {},
+    notif_trickWin: function (notif) {
+      this.moveCardToHistory(
+        notif.args.player_id,
+        notif.args.suit,
+        notif.args.value
+      );
+    },
   });
 });
