@@ -260,8 +260,6 @@ define([
         "historycard_" + player_id + Math.ceil(this.historyqtd / 2)
       ).play();
 
-      console.log(this.historyqtd);
-
       dojo.destroy("cardontable_" + player_id);
     },
 
@@ -387,9 +385,11 @@ define([
     setupNotifications: function () {
       console.log("notifications subscriptions setup");
 
-      dojo.subscribe("newHand", this, "notif_newHand");
       dojo.subscribe("playCard", this, "notif_playCard");
       dojo.subscribe("trickWin", this, "notif_trickWin");
+      this.notifqueue.setSynchronous("trickWin", 1000);
+      dojo.subscribe("newTrick", this, "notif_newTrick");
+      dojo.subscribe("newHand", this, "notif_newHand");
     },
 
     notif_newHand: function (notif) {
@@ -416,7 +416,9 @@ define([
       );
     },
 
-    notif_trickWin: function (notif) {
+    notif_trickWin: function (notif) {},
+
+    notif_newTrick: function (notif) {
       this.moveCardToHistory(
         notif.args.player_id,
         notif.args.suit,
