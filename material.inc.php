@@ -54,6 +54,7 @@ $this->suits = array(
 
 $this->suits_strength = array(
   // clubs > spades > hearts > diamonds
+  0 => 0,
   1 => 3,
   2 => 2,
   3 => 4,
@@ -70,9 +71,10 @@ $this->values_label = array(
 
 $this->values_strength = array(
   // A > 10 > K > Q > 7
+  0 => 0,
   7 => 1,
-  12 => 2,
   10 => 4,
+  12 => 2,
   13 => 3,
   14 => 5,
 );

@@ -309,8 +309,8 @@ class Mate extends Table
     {
         // New trick: active the player who wins the last trick
         // Reset trick suit and trick value to 0 (= no suit and no value)
-        self::setGameStateInitialValue('trickSuit', 0);
-        self::setGameStateInitialValue('trickValue', 0);
+        self::setGameStateValue('trickSuit', 0);
+        self::setGameStateValue('trickValue', 0);
         $this->gamestate->nextState("");
     }
 
@@ -324,16 +324,30 @@ class Mate extends Table
             $currentTrickSuit = self::getGameStateValue('trickSuit');
             $currentTrickValue = self::getGameStateValue('trickValue');
 
+            $same_suit = true;
             foreach ($cards_on_table as $card) {
-                // Note: type = card suit
-                if ($card['type'] == $currentTrickSuit) {
+                if ($card['type'] != $currentTrickSuit) $same_suit = false;
+            }
+
+            if ($same_suit) {
+                foreach ($cards_on_table as $card) {
                     $card_value_strength = $this->values_strength[$card['type_arg']];
-                    if ($best_value_player_id === null || $card_value_strength > $currentTrickValue) {
-                        $best_value_player_id = $card['location_arg']; // Note: location_arg = player who played this card on table
+                    $current_strength = $this->values_strength[$currentTrickValue];
+
+                    if (($best_value_player_id === null || $card_value_strength > $current_strength) && $card_value_strength >= $current_strength) {
+                        $best_value_player_id = $card['location_arg'];
                     }
-                } else {
+                }
+            } else {
+
+                foreach ($cards_on_table as $card) {
                     $card_suit_strength = $this->suits_strength[$card['type']];
-                    if ($best_value_player_id === null || $card_suit_strength > $currentTrickSuit) {
+                    $current_strength = $this->suits_strength[$currentTrickSuit];
+
+                    if (
+                        ($best_value_player_id === null || $card_suit_strength >
+                            $current_strength)  && $card_suit_strength >= $current_strength
+                    ) {
                         $best_value_player_id = $card['location_arg'];
                     }
                 }
