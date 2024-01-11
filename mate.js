@@ -390,6 +390,9 @@ define([
       this.notifqueue.setSynchronous("trickWin", 1000);
       dojo.subscribe("newTrick", this, "notif_newTrick");
       dojo.subscribe("newHand", this, "notif_newHand");
+      dojo.subscribe("newScores", this, "notif_newScores");
+      dojo.subscribe("points", this, "notif_points");
+      this.notifqueue.setSynchronous("points", 1000);
     },
 
     notif_newHand: function (notif) {
@@ -424,6 +427,17 @@ define([
         notif.args.suit,
         notif.args.value
       );
+    },
+
+    notif_newScores: function (notif) {
+      // Update players' scores
+      for (var player_id in notif.args.newScores) {
+        this.scoreCtrl[player_id].toValue(notif.args.newScores[player_id]);
+      }
+    },
+
+    notif_points: function (notif) {
+      
     },
   });
 });

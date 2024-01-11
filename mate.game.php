@@ -293,6 +293,7 @@ class Mate extends Table
 
         foreach ($players as $player_id => $player) {
             $this->cards->moveAllCardsInLocation('cardsontable', 'hand', $player_id, $player_id);
+            $this->cards->moveAllCardsInLocation('cardswon', 'hand', $player_id, $player_id);
         }
 
         foreach ($players as $player_id => $player) {
@@ -304,6 +305,7 @@ class Mate extends Table
         $this->gamestate->nextState("");
     }
 
+
     function stNewTrick()
     {
 
@@ -314,7 +316,7 @@ class Mate extends Table
                 $cards_on_table = $this->cards->getCardsInLocation('cardsontable', $player_id);
                 $card = array_shift($cards_on_table);
 
-                $this->cards->moveAllCardsInLocation('cardsontable', 'temporary', $player_id, $player_id);
+                $this->cards->moveAllCardsInLocation('cardsontable', 'cardswon', $player_id, $player_id);
 
                 self::notifyAllPlayers('newTrick', clienttranslate(''), array(
                     'player_id' => $player_id,
@@ -334,6 +336,36 @@ class Mate extends Table
     function stNextPlayer()
     {
         // Active next player OR end the trick and go to the next trick OR end the hand
+
+        $players = self::loadPlayersBasicInfos();
+
+        $currentTrickSuit = self::getGameStateValue('trickSuit');
+        $currentTrickValue = self::getGameStateValue('trickValue');
+
+        if ($this->cards->countCardInLocation('cardsontable') == 1 && $currentTrickSuit && $currentTrickValue) {
+            $player_id = $this->getActivePlayerId();
+            $filtered_players = array_filter($players, fn ($other_player) =>
+            $player_id != $other_player, ARRAY_FILTER_USE_KEY);
+            $ids = array_keys($filtered_players);
+            $next_player = array_shift($ids);
+
+            $can_play = false;
+            $cards = $this->cards->getCardsInLocation('hand', $next_player);
+
+            foreach ($cards as $card) {
+                if ($card['type_arg'] == $currentTrickValue || $card['type'] == $currentTrickSuit) {
+                    self::warn('can play');
+                    $can_play = true;
+                    break;
+                }
+            }
+
+            if (!$can_play) {
+                $this->gamestate->nextState('endHand');
+                return;
+            }
+        }
+
         if ($this->cards->countCardInLocation('cardsontable') == 2) {
             // This is the end of the trick
             $cards_on_table = $this->cards->getCardsInLocation('cardsontable');
@@ -386,7 +418,6 @@ class Mate extends Table
                 $this->gamestate->nextState("endHand");
             } else {
                 // End of the trick
-
                 $this->gamestate->nextState("nextTrick");
             }
         } else {
@@ -401,6 +432,43 @@ class Mate extends Table
 
     function stEndHand()
     {
+        $players = self::loadPlayersBasicInfos();
+
+        $cards = $this->cards->getCardsInLocation("cardswon");
+        $cards_on_table = $this->cards->getCardsInLocation("cardsontable");
+
+        $checkmate_card = array_shift($cards_on_table);
+
+        $winner_id = $checkmate_card['location_arg'];
+
+        $checkmate_weight = $this->values_weight[$checkmate_card['type_arg']];
+
+        $trick_nbr = ceil(count($cards) / 2) + 1;
+
+        $points = $checkmate_weight * $trick_nbr;
+
+        // Apply scores to player
+        if ($points != 0 && $this->cards->countCardInLocation("hand") > 0) {
+            $sql = "UPDATE player SET player_score=player_score+$points WHERE player_id='$winner_id'";
+            self::DbQuery($sql);
+            self::notifyAllPlayers("points", clienttranslate('${player_name} mates with a ${card} after ${tricks} tricks, scoring ${points} points!'), array(
+                'player_id' => $winner_id, 'player_name' => $players[$winner_id]['player_name'],
+                'card' => $this->values_label[$checkmate_card['type_arg']],
+                'tricks' => $trick_nbr,
+                'points' => $points,
+            ));
+
+            $score = 0;
+            $collection = self::getCollectionFromDb("SELECT player_score FROM player WHERE player_id='$winner_id'");
+            foreach ($collection as $info) {
+                $score = $info['player_score'];
+            }
+
+            self::notifyAllPlayers("newScores", '', array('player_id' => $winner_id, 'newScores' => $score));
+        } else {
+            self::notifyAllPlayers("points", clienttranslate('Hand finished with no mate!'), array());
+        }
+
 
         $this->gamestate->nextState("newHand");
     }
