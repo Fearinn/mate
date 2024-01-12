@@ -106,8 +106,8 @@ define([
       );
 
       // Setting up player boards
-      for (var player_id in gamedatas.players) {
-        var player = gamedatas.players[player_id];
+      for (var player_id in this.gamedatas.players) {
+        var player = this.gamedatas.players[player_id];
       }
 
       // Setup game notifications to handle (see "setupNotifications" method below)
@@ -392,7 +392,6 @@ define([
       dojo.subscribe("newHand", this, "notif_newHand");
       dojo.subscribe("newScores", this, "notif_newScores");
       dojo.subscribe("points", this, "notif_points");
-      this.notifqueue.setSynchronous("points", 1000);
     },
 
     notif_newHand: function (notif) {
@@ -407,6 +406,16 @@ define([
           card.id
         );
       }
+
+      for (var player_id in this.gamedatas.players) {
+        dojo.destroy("cardontable_" + player_id);
+
+        for (var i = 0; i <= 10; i++) {
+          dojo.destroy("cardonhistory_" + player_id);
+        }
+      }
+
+      this.historyqtd = 0;
     },
 
     notif_playCard: function (notif) {
@@ -431,13 +440,9 @@ define([
 
     notif_newScores: function (notif) {
       // Update players' scores
-      for (var player_id in notif.args.newScores) {
-        this.scoreCtrl[player_id].toValue(notif.args.newScores[player_id]);
-      }
+      this.scoreCtrl[notif.args.player_id].toValue(notif.args.newScores);
     },
 
-    notif_points: function (notif) {
-      
-    },
+    notif_points: function (notif) {},
   });
 });

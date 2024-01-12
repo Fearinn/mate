@@ -292,18 +292,27 @@ class Mate extends Table
         $players = self::loadPlayersBasicInfos();
 
         foreach ($players as $player_id => $player) {
-            $this->cards->moveAllCardsInLocation('cardsontable', 'hand', $player_id, $player_id);
-            $this->cards->moveAllCardsInLocation('cardswon', 'hand', $player_id, $player_id);
+            $filtered_players = array_filter($players, fn ($other_player) =>
+            $player_id != $other_player, ARRAY_FILTER_USE_KEY);
+
+            $ids = array_keys($filtered_players);
+
+            $other_player = array_shift($ids);
+            $this->cards->moveAllCardsInLocation('cardsontable', 'temporary', $player_id, $other_player);
+            $this->cards->moveAllCardsInLocation('cardswon', 'temporary', $player_id, $other_player);
+            $this->cards->moveAllCardsInLocation('hand', 'temporary', $player_id, $other_player);
         }
 
         foreach ($players as $player_id => $player) {
+            $this->cards->moveAllCardsInLocation('temporary', 'hand', $player_id, $player_id);
+
             $cards = $this->cards->getPlayerHand($player_id);
             // Notify player about his cards
             self::notifyPlayer($player_id, 'newHand', '', array('cards' => $cards));
         }
-
         $this->gamestate->nextState("");
     }
+
 
 
     function stNewTrick()
