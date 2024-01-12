@@ -211,19 +211,37 @@ class Mate extends Table
     {
         self::checkAction("playCard");
         $player_id = self::getActivePlayerId();
-        $this->cards->moveCard($card_id, 'cardsontable', $player_id);
 
         $currentCard = $this->cards->getCard($card_id);
         $currentTrickSuit = self::getGameStateValue('trickSuit');
         $currentTrickValue = self::getGameStateValue('trickValue');
+        $hand = $this->cards->getCardsInLocation('hand', $player_id);
 
         if (!$currentTrickSuit || !$currentTrickValue) {
             self::setGameStateValue('trickSuit', $currentCard['type']);
             self::setGameStateValue('trickValue', $currentCard['type_arg']);
         }
 
-        if ($currentTrickSuit && $currentCard && $currentTrickSuit != $currentCard['type'] && $currentCard['type_arg'] != $currentTrickValue)
-            throw new BgaVisibleSystemException("You can't play this card now");
+        if ($currentTrickSuit && $currentCard) {
+            $same_suit = false;
+
+            if ($currentTrickSuit != $currentCard['type'] && $currentCard['type_arg'] != $currentTrickValue) {
+                throw new BgaVisibleSystemException("You can't play this card now");
+            }
+
+            foreach ($hand as $card) {
+                if ($currentTrickSuit && $currentTrickSuit == $card['type']) {
+                    $same_suit = true;
+                    break;
+                }
+            }
+
+            if ($same_suit && $currentCard['type'] != $currentTrickSuit) {
+                throw new BgaVisibleSystemException("You must play a card of the current suit");
+            }
+        }
+
+        $this->cards->moveCard($card_id, 'cardsontable', $player_id);
 
         // And notify
         self::notifyAllPlayers('playCard', clienttranslate('${player_name} plays ${value_displayed} ${suit_displayed}'), array(
