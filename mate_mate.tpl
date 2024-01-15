@@ -25,7 +25,7 @@
   <div class="whiteblock">
     <div id="historycards" class="historycards">
     <!-- BEGIN historycardsblock -->
-      <div class="historycard historycard_{DIR}" id="historycard_{PLAYER_ID}{NUM}" style="border-color: #{PLAYER_COLOR}"></div>
+      <div class="historycard historycard_{DIR}" id="historycard_{PLAYER_ID}_{NUM}" style="border-color: #{PLAYER_COLOR}"></div>
     <!-- END historycardsblock -->
     </div>
   </div>
@@ -44,7 +44,7 @@
                         </div>';
 
     var jstpl_cardonhistory =
-      '<div class="cardonhistory" id="cardonhistory_${player_id}" style="background-position:-${x}px -${y}px">\
+      '<div class="cardonhistory" id="cardonhistory_${player_id}_${num}" style="background-position:-${x}px -${y}px">\
                         </div>';
   </script>
 

@@ -95,7 +95,7 @@ class Mate extends Table
         foreach ($this->suits as $suit_id => $suit) {
             // spade, heart, diamond, club
             foreach ($this->values_label as $value => $value_label) {
-                $cards[] = array('type' => $suit_id, 'type_arg' => $value, 'nbr' => 1);
+                $cards[] = array('type' => $suit_id, 'type_arg' => $value, 'order' => 0, 'nbr' => 1);
             }
         }
 
@@ -131,6 +131,8 @@ class Mate extends Table
 
         $current_player_id = self::getCurrentPlayerId();    // !! We must only return informations visible by this player !!
 
+        $players = self::loadPlayersBasicInfos();
+
         // Get information about players
         // Note: you can retrieve some extra field you added for "player" table in "dbmodel.sql" if you need it.
         $sql = "SELECT player_id id, player_score score FROM player ";
@@ -142,6 +144,10 @@ class Mate extends Table
         // Cards played on the table
         $result['cardsontable'] = $this->cards->getCardsInLocation('cardsontable');
 
+        foreach ($players as $player_id => $info) {
+            $sql = "SELECT card_order, card_location, card_location_arg, card_type, card_type_arg FROM card WHERE card_location_arg='$player_id' AND card_location='cardswon'";
+            $result['cardswon'][$player_id] = self::getCollectionFromDb($sql);
+        }
 
         return $result;
     }
@@ -207,7 +213,7 @@ class Mate extends Table
     
     */
 
-    function playCard($card_id)
+    function playCard($card_id, $order)
     {
         self::checkAction("playCard");
         $player_id = self::getActivePlayerId();
@@ -250,7 +256,8 @@ class Mate extends Table
             'value_displayed' => $this->values_label[$currentCard['type_arg']], 'suit' => $currentCard['type'],
             'suit_displayed' => $this->suits[$currentCard['type']]['name']
         ));
-
+        $sql = "UPDATE card SET card_order=$order WHERE card_id='$card_id'";
+        self::DbQuery($sql);
         // Next player
         $this->gamestate->nextState('playCard');
     }
@@ -381,7 +388,6 @@ class Mate extends Table
 
             foreach ($cards as $card) {
                 if ($card['type_arg'] == $currentTrickValue || $card['type'] == $currentTrickSuit) {
-                    self::warn('can play');
                     $can_play = true;
                     break;
                 }

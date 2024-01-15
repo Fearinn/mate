@@ -62,7 +62,8 @@ class action_mate extends APP_GameAction
   {
     self::setAjaxMode();
     $card_id = self::getArg("id", AT_posint, true);
-    $this->game->playCard($card_id);
+    $card_order = self::getArg('order', AT_int, true);
+    $this->game->playCard($card_id, $card_order);
     self::ajaxResponse();
   }
 }

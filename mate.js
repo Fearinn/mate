@@ -64,8 +64,8 @@ define([
 
       // Create cards types:
       for (var suit = 1; suit <= 4; suit++) {
-        for (var value = 2; value <= 14; value++) {
-          if (value == 7 || value >= 10) {
+        for (var value = 7; value <= 14; value++) {
+          if (value == 7 || value == 10 || value >= 12) {
             // Build card type id
             var card_type_id = this.getCardUniqueId(suit, value);
             this.playerHand.addItemType(
@@ -98,6 +98,17 @@ define([
         this.playCardOnTable(player_id, suit, value, card.id);
       }
 
+      // Cards on history
+      for (player_id in this.gamedatas.players) {
+        for (key in this.gamedatas.cardswon[player_id]) {
+          var card = this.gamedatas.cardswon[player_id][key];
+          var order = card.card_order;
+          var suit = card.card_type;
+          var value = card.card_type_arg;
+          this.moveCardToHistory(player_id, suit, value, order);
+        }
+      }
+
       dojo.connect(
         this.playerHand,
         "onChangeSelection",
@@ -106,7 +117,7 @@ define([
       );
 
       // Setting up player boards
-      for (var player_id in this.gamedatas.players) {
+      for (player_id in this.gamedatas.players) {
         var player = this.gamedatas.players[player_id];
       }
 
@@ -242,25 +253,26 @@ define([
       ).play();
     },
 
-    moveCardToHistory: function (player_id, suit, value) {
+    moveCardToHistory: function (player_id, suit, value, order = 0) {
       this.historyqtd++;
+
+      var trick_num = order || Math.ceil(this.historyqtd / 2);
 
       dojo.place(
         this.format_block("jstpl_cardonhistory", {
           x: this.cardwidth * (value - 2),
           y: this.cardheight * (suit - 1),
           player_id: player_id,
+          num: trick_num,
         }),
-        "historycard_" + player_id + Math.ceil(this.historyqtd / 2)
+        "historycard_" + player_id + "_" + trick_num
       );
 
       // In any case: move it to its final destination
       this.slideToObject(
-        "cardonhistory_" + player_id,
-        "historycard_" + player_id + Math.ceil(this.historyqtd / 2)
+        "cardonhistory_" + player_id + "_" + trick_num,
+        "historycard_" + player_id + "_" + trick_num
       ).play();
-
-      dojo.destroy("cardontable_" + player_id);
     },
 
     ///////////////////////////////////////////////////
@@ -279,6 +291,7 @@ define([
 
     onPlayerHandSelectionChanged: function () {
       var items = this.playerHand.getSelectedItems();
+      var length = this.playerHand.count();
 
       if (items.length > 0) {
         var action = "playCard";
@@ -295,6 +308,7 @@ define([
               ".html",
             {
               id: card_id,
+              order: 10 - length + 1,
               lock: true,
             },
             this,
@@ -411,7 +425,7 @@ define([
         dojo.destroy("cardontable_" + player_id);
 
         for (var i = 0; i <= 10; i++) {
-          dojo.destroy("cardonhistory_" + player_id);
+          dojo.destroy("cardonhistory_" + player_id + "_" + i);
         }
       }
 
@@ -436,6 +450,8 @@ define([
         notif.args.suit,
         notif.args.value
       );
+
+      dojo.destroy("cardontable_" + notif.args.player_id);
     },
 
     notif_newScores: function (notif) {
