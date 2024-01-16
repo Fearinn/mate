@@ -1,1 +1,21 @@
-{}
+{
+  "100": {
+    "name": "Privilege",
+    "values": {
+      "0": {
+        "name": "None",
+        "description": "The second player of the trick must always play a card of the current suit, if possible. This is the default."
+      },
+      "1": {
+        "name": "King's privilege",
+        "description": "When a player plays a King, the other player must follow with another King, if possible. Otherwise, they must play a card of the current suit.",
+        "nobeginner": true
+      },
+      "2": {
+        "name": "Figure privilege",
+        "description": "When a player plays a figure (King/Queen), the other player must follow with the same figure (King/Queen), if possible. Otherwise, they must play a card of the current suit.",
+        "nobeginner": true
+      }
+    }
+  }
+}

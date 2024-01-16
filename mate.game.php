@@ -37,6 +37,7 @@ class Mate extends Table
             "trickSuit" => 11,
             "trickValue" => 12,
             "handsPlayed" => 13,
+            "privilege" => 100,
         ));
 
         $this->cards = self::getNew("module.common.deck");
@@ -222,8 +223,11 @@ class Mate extends Table
         $player_id = self::getActivePlayerId();
 
         $currentCard = $this->cards->getCard($card_id);
+
         $currentTrickSuit = self::getGameStateValue('trickSuit');
         $currentTrickValue = self::getGameStateValue('trickValue');
+        $privilege = self::getGameStateValue('privilege');
+
         $hand = $this->cards->getCardsInLocation('hand', $player_id);
 
         if (!$currentTrickSuit || !$currentTrickValue) {
@@ -231,22 +235,40 @@ class Mate extends Table
             self::setGameStateValue('trickValue', $currentCard['type_arg']);
         }
 
-        if ($currentTrickSuit && $currentCard) {
+        if ($currentTrickSuit && $currentTrickValue && $currentCard) {
             $same_suit = false;
+            $k_in_hand = false;
+            $q_in_hand = false;
+
 
             if ($currentTrickSuit != $currentCard['type'] && $currentCard['type_arg'] != $currentTrickValue) {
                 throw new BgaVisibleSystemException("You can't play this card now");
             }
 
             foreach ($hand as $card) {
-                if ($currentTrickSuit && $currentTrickSuit == $card['type']) {
+                if ($currentTrickSuit == $card['type']) {
                     $same_suit = true;
-                    break;
+                }
+
+                if ($card['type_arg'] == 12) {
+                    $q_in_hand = true;
+                }
+
+                if ($card['type_arg'] == 13) {
+                    $k_in_hand = true;
                 }
             }
 
-            if ($same_suit && $currentCard['type'] != $currentTrickSuit) {
+            if ($privilege == 0 && $same_suit && $currentCard['type'] != $currentTrickSuit) {
                 throw new BgaVisibleSystemException("You must play a card of the current suit");
+            }
+
+            if (($privilege == 1 || $privilege == 2) && $k_in_hand && $currentTrickValue == 13 && $currentCard['type_arg'] != 13) {
+                throw new BgaVisibleSystemException("You must play a K card");
+            }
+
+            if ($privilege == 2 && $q_in_hand && $currentTrickValue == 12 && $currentCard['type_arg'] != 12) {
+                throw new BgaVisibleSystemException("You must play a Q card");
             }
         }
 
