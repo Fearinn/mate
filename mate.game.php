@@ -36,6 +36,7 @@ class Mate extends Table
         self::initGameStateLabels(array(
             "trickSuit" => 11,
             "trickValue" => 12,
+            "handsPlayed" => 13,
         ));
 
         $this->cards = self::getNew("module.common.deck");
@@ -84,6 +85,8 @@ class Mate extends Table
         self::setGameStateInitialValue('trickSuit', 0);
 
         self::setGameStateInitialValue('trickValue', 0);
+
+        self::setGameStateInitialValue('handsPlayed', 0);
 
         // Init game statistics
         // (note: statistics used in this file must be defined in your stats.inc.php file)
@@ -502,6 +505,14 @@ class Mate extends Table
             self::notifyAllPlayers("points", clienttranslate('Hand finished with no mate!'), array());
         }
 
+
+        $handsPlayed = self::getGameStateValue('handsPlayed');
+        self::setGameStateValue('handsPlayed', $handsPlayed + 1);
+
+        if (self::getGameStateValue('handsPlayed') == 2) {
+            $this->gamestate->nextState('endGame');
+            return;
+        }
 
         $this->gamestate->nextState("newHand");
     }
