@@ -3,7 +3,7 @@
 /**
  *------
  * BGA framework: Gregory Isabelli & Emmanuel Colin & BoardGameArena
- * Mate implementation : © <Your name here> <Your email address here>
+ * Mate implementation : © <Matheus Gomes> <matheusgomesforwork@gmail.com>
  * 
  * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
  * See http://en.boardgamearena.com/#!doc/Studio for more information.
@@ -245,7 +245,7 @@ class Mate extends Table
 
 
             if ($currentTrickSuit != $currentCard['type'] && $currentCard['type_arg'] != $currentTrickValue) {
-                throw new BgaVisibleSystemException("You can't play this card now");
+                throw new BgaUserException(self::_("You can't play this card now"));
             }
 
             foreach ($hand as $card) {
@@ -262,16 +262,20 @@ class Mate extends Table
                 }
             }
 
-            if ($privilege == 0 && $same_suit && $currentCard['type'] != $currentTrickSuit) {
-                throw new BgaVisibleSystemException("You must play a card of the current suit");
-            }
-
             if (($privilege == 1 || $privilege == 2) && $k_in_hand && $currentTrickValue == 13 && $currentCard['type_arg'] != 13) {
-                throw new BgaVisibleSystemException("You must play a K card");
+                throw new BgaUserException(self::_("You must play a K card"));
             }
 
             if ($privilege == 2 && $q_in_hand && $currentTrickValue == 12 && $currentCard['type_arg'] != 12) {
-                throw new BgaVisibleSystemException("You must play a Q card");
+                throw new BgaUserException(self::_("You must play a Q card"));
+            }
+
+            if (
+                $same_suit && $currentCard['type'] != $currentTrickSuit
+                && !($currentTrickValue == 13 && $currentCard['type_arg'] == 13 && ($privilege == 1 || $privilege == 2))
+                && !($currentTrickValue == 12 && $currentCard['type_arg'] == 12 && $privilege == 2)
+            ) {
+                throw new BgaUserException(self::_("You must play a card of the current suit"));
             }
         }
 
