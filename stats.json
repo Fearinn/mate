@@ -1,1 +1,26 @@
-{}
+{
+  "table": {
+    "tricks_number": {
+      "id": 10,
+      "name": "Number of tricks",
+      "type": "int"
+    },
+    "fewer_tricks_mate": {
+      "id": 11,
+      "name": "Fewer tricks in a mate",
+      "type": "int"
+    },
+    "most_tricks_mate": {
+      "id": 12,
+      "name": "Most tricks in a mate",
+      "type": "int"
+    }
+  },
+  "player": {
+    "tricks_won": {
+      "id": 10,
+      "name": "Tricks won",
+      "type": "int"
+    }
+  }
+}

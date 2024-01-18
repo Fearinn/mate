@@ -91,8 +91,11 @@ class Mate extends Table
 
         // Init game statistics
         // (note: statistics used in this file must be defined in your stats.inc.php file)
-        //self::initStat( 'table', 'table_teststat1', 0 );    // Init a table statistics
-        //self::initStat( 'player', 'player_teststat1', 0 );  // Init a player statistics (for all players)
+
+        self::initStat("table", "tricks_number", 0);
+        self::initStat("table", "fewer_tricks_mate", 0);
+        self::initStat("table", "most_tricks_mate", 0);
+        self::initStat("player", "tricks_won", 0);
 
         // Create cards
         $cards = array();
@@ -462,6 +465,7 @@ class Mate extends Table
 
             // Active this player => he's the one who starts the next trick
             $this->gamestate->changeActivePlayer($best_value_player_id);
+            self::incStat(1, "tricks_won", $best_value_player_id);
 
             $players = self::loadPlayersBasicInfos();
 
@@ -476,6 +480,7 @@ class Mate extends Table
                 $this->gamestate->nextState("endHand");
             } else {
                 // End of the trick
+                self::incStat(1, "tricks_number");
                 $this->gamestate->nextState("nextTrick");
             }
         } else {
@@ -506,7 +511,16 @@ class Mate extends Table
         $points = $checkmate_weight * $trick_nbr;
 
         // Apply scores to player
-        if ($points != 0 && $this->cards->countCardInLocation("hand") > 0) {
+        if ($points && $this->cards->countCardInLocation("hand") > 0) {
+
+            if (!self::getStat("fewer_tricks_mate") || $trick_nbr < self::getStat("fewer_tricks_mate")) {
+                self::setStat($trick_nbr, "fewer_tricks_mate");
+            }
+
+            if ($trick_nbr > self::getStat("most_tricks_mate")) {
+                self::setStat($trick_nbr, "most_tricks_mate");
+            }
+
             $sql = "UPDATE player SET player_score=player_score+$points WHERE player_id='$winner_id'";
             self::DbQuery($sql);
             self::notifyAllPlayers("points", clienttranslate('${player_name} mates with a ${card} after ${tricks} tricks, scoring ${points} points!'), array(
