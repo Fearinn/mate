@@ -73,6 +73,15 @@ $machinestates = array(
         "transitions" => array("" => 30)
     ),
 
+    // New round
+
+    3 => array(
+        "name" => "newRound",
+        "description" => "",
+        "type" => "game",
+        "action" => "stNewRound",
+        "transitions" => array("" => 32)
+    ),
 
     // Trick
 
@@ -99,14 +108,13 @@ $machinestates = array(
         "transitions" => array("nextPlayer" => 31, "nextTrick" => 30, "endHand" => 40)
     ),
 
-
     // End of the hand (scoring, etc...)
     40 => array(
         "name" => "endHand",
         "description" => clienttranslate(`It's a checkmate!`),
         "type" => "game",
         "action" => "stEndHand",
-        "transitions" => array("newHand" => 2, "endGame" => 99)
+        "transitions" => array("newHand" => 2, "newRound" => 3, "endGame" => 99)
     ),
 
     // Final state.

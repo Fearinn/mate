@@ -84,9 +84,7 @@ class Mate extends Table
 
         // Set current trick suit to zero (= no trick suit)
         self::setGameStateInitialValue('trickSuit', 0);
-
         self::setGameStateInitialValue('trickValue', 0);
-
         self::setGameStateInitialValue('handsPlayed', 0);
 
         // Init game statistics
@@ -365,12 +363,27 @@ class Mate extends Table
 
             $cards = $this->cards->getPlayerHand($player_id);
             // Notify player about his cards
-            self::notifyPlayer($player_id, 'newHand', '', array('cards' => $cards));
+            self::notifyPlayer($player_id, 'newHand', clienttranslate('A new hand starts. Players exchange hands.'), array('cards' => $cards));
         }
         $this->gamestate->nextState("");
     }
 
+    function stNewRound()
+    {
+        $players = self::loadPlayersBasicInfos();
 
+        $this->cards->moveAllCardsInLocation('hand', 'deck');
+        $this->cards->moveAllCardsInLocation('cardswon', 'deck');
+        $this->cards->moveAllCardsInLocation('cardsontable', 'deck');
+        $this->cards->shuffle('deck');
+
+        foreach ($players as $player_id => $player) {
+            $cards = $this->cards->pickCards(10, 'deck', $player_id);
+            self::notifyPlayer($player_id, 'newHand', clienttranslate('A new round starts. Cards are shuffled and dealt again.'), array('cards' => $cards));
+        }
+
+        $this->gamestate->nextState("");
+    }
 
     function stNewTrick()
     {
@@ -384,7 +397,7 @@ class Mate extends Table
 
                 $this->cards->moveAllCardsInLocation('cardsontable', 'cardswon', $player_id, $player_id);
 
-                self::notifyAllPlayers('newTrick', clienttranslate(''), array(
+                self::notifyAllPlayers('newTrick', '', array(
                     'player_id' => $player_id,
                     'suit' => $card['type'],
                     'value' => $card['type_arg'],
@@ -545,14 +558,19 @@ class Mate extends Table
             self::notifyAllPlayers("points", clienttranslate('Hand finished with no mate!'), array());
         }
 
-
         $handsPlayed = self::getGameStateValue('handsPlayed');
         self::setGameStateValue('handsPlayed', $handsPlayed + 1);
 
         if (self::getGameStateValue('handsPlayed') == 2) {
+            $this->gamestate->nextState('newRound');
+            return;
+        }
+
+        if (self::getGameStateValue('handsPlayed') == 4) {
             $this->gamestate->nextState('endGame');
             return;
         }
+
 
         $this->gamestate->nextState("newHand");
     }
