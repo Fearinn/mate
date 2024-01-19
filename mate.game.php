@@ -169,9 +169,9 @@ class Mate extends Table
     */
     function getGameProgression()
     {
-        // TODO: compute and return the game progression
+        $handsPlayed = self::getGameStateValue("handsPlayed");
 
-        return 0;
+        return $handsPlayed * 25;
     }
 
 
@@ -344,27 +344,30 @@ class Mate extends Table
 
     function stNewHand()
     {
-        $players = self::loadPlayersBasicInfos();
+        if (self::getGameStateValue('handsPlayed') > 0) {
+            $players = self::loadPlayersBasicInfos();
 
-        foreach ($players as $player_id => $player) {
-            $filtered_players = array_filter($players, fn ($other_player) =>
-            $player_id != $other_player, ARRAY_FILTER_USE_KEY);
+            foreach ($players as $player_id => $player) {
+                $filtered_players = array_filter($players, fn ($other_player) =>
+                $player_id != $other_player, ARRAY_FILTER_USE_KEY);
 
-            $ids = array_keys($filtered_players);
+                $ids = array_keys($filtered_players);
 
-            $other_player = array_shift($ids);
-            $this->cards->moveAllCardsInLocation('cardsontable', 'temporary', $player_id, $other_player);
-            $this->cards->moveAllCardsInLocation('cardswon', 'temporary', $player_id, $other_player);
-            $this->cards->moveAllCardsInLocation('hand', 'temporary', $player_id, $other_player);
+                $other_player = array_shift($ids);
+                $this->cards->moveAllCardsInLocation('cardsontable', 'temporary', $player_id, $other_player);
+                $this->cards->moveAllCardsInLocation('cardswon', 'temporary', $player_id, $other_player);
+                $this->cards->moveAllCardsInLocation('hand', 'temporary', $player_id, $other_player);
+            }
+
+            foreach ($players as $player_id => $player) {
+                $this->cards->moveAllCardsInLocation('temporary', 'hand', $player_id, $player_id);
+
+                $cards = $this->cards->getPlayerHand($player_id);
+                // Notify player about his cards
+                self::notifyPlayer($player_id, 'newHand', clienttranslate('A new hand starts. Players exchange hands.'), array('cards' => $cards));
+            }
         }
 
-        foreach ($players as $player_id => $player) {
-            $this->cards->moveAllCardsInLocation('temporary', 'hand', $player_id, $player_id);
-
-            $cards = $this->cards->getPlayerHand($player_id);
-            // Notify player about his cards
-            self::notifyPlayer($player_id, 'newHand', clienttranslate('A new hand starts. Players exchange hands.'), array('cards' => $cards));
-        }
         $this->gamestate->nextState("");
     }
 
