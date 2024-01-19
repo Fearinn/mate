@@ -183,6 +183,15 @@ class Mate extends Table
         In this space, you can put any utility methods useful for your game logic
     */
 
+    function getOtherPlayer($players, $player_id)
+    {
+        $filtered_players = array_filter($players, fn ($other_player) =>
+        $player_id != $other_player, ARRAY_FILTER_USE_KEY);
+        $ids = array_keys($filtered_players);
+
+        return array_shift($ids);
+    }
+
     //////////////////////////////////////////////////////////////////////////////
     //////////// Player actions
     //////////// 
@@ -190,32 +199,6 @@ class Mate extends Table
     /*
         Each time a player is doing some game action, one of the methods below is called.
         (note: each method below must match an input method in mate.action.php)
-    */
-
-    /*
-    
-    Example:
-
-    function playCard( $card_id )
-    {
-        // Check that this is the player's turn and that it is a "possible action" at this game state (see states.inc.php)
-        self::checkAction( 'playCard' ); 
-        
-        $player_id = self::getActivePlayerId();
-        
-        // Add your game logic to play a card there 
-        ...
-        
-        // Notify all players about the card played
-        self::notifyAllPlayers( "cardPlayed", clienttranslate( '${player_name} plays ${card_name}' ), array(
-            'player_id' => $player_id,
-            'player_name' => self::getActivePlayerName(),
-            'card_name' => $card_name,
-            'card_id' => $card_id
-        ) );
-          
-    }
-    
     */
 
     function playCard($card_id, $order)
@@ -348,12 +331,7 @@ class Mate extends Table
             $players = self::loadPlayersBasicInfos();
 
             foreach ($players as $player_id => $player) {
-                $filtered_players = array_filter($players, fn ($other_player) =>
-                $player_id != $other_player, ARRAY_FILTER_USE_KEY);
-
-                $ids = array_keys($filtered_players);
-
-                $other_player = array_shift($ids);
+                $other_player = $this->getOtherPlayer($players, $player_id);
                 $this->cards->moveAllCardsInLocation('cardsontable', 'temporary', $player_id, $other_player);
                 $this->cards->moveAllCardsInLocation('cardswon', 'temporary', $player_id, $other_player);
                 $this->cards->moveAllCardsInLocation('hand', 'temporary', $player_id, $other_player);
@@ -426,10 +404,7 @@ class Mate extends Table
 
         if ($this->cards->countCardInLocation('cardsontable') == 1 && $currentTrickSuit && $currentTrickValue) {
             $player_id = $this->getActivePlayerId();
-            $filtered_players = array_filter($players, fn ($other_player) =>
-            $player_id != $other_player, ARRAY_FILTER_USE_KEY);
-            $ids = array_keys($filtered_players);
-            $next_player = array_shift($ids);
+            $next_player = $this->getOtherPlayer($players, $player_id);
 
             $can_play = false;
             $cards = $this->cards->getCardsInLocation('hand', $next_player);
@@ -483,8 +458,8 @@ class Mate extends Table
                 }
             }
 
-            // Active this player => he's the one who starts the next trick
-            $this->gamestate->changeActivePlayer($best_value_player_id);
+            // Active this player => he's the one who starts the next tric
+
             self::incStat(1, "tricks_won", $best_value_player_id);
 
             $players = self::loadPlayersBasicInfos();
@@ -500,6 +475,7 @@ class Mate extends Table
                 $this->gamestate->nextState("endHand");
             } else {
                 // End of the trick
+                $this->gamestate->changeActivePlayer($best_value_player_id);
                 self::incStat(1, "tricks_number");
                 $this->gamestate->nextState("nextTrick");
             }
