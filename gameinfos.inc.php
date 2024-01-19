@@ -25,7 +25,7 @@ $gameinfos = array(
     'year' => 1915,
 
     // Game publisher (use empty string if there is no publisher)
-    'publisher' => 'Public domain',
+    'publisher' => '',
 
     // Url of game publisher website
     'publisher_website' => '',
@@ -88,7 +88,7 @@ $gameinfos = array(
     'language_dependency' => false,
 
     // Complexity of the game, from 0 (extremely simple) to 5 (extremely complex)
-    'complexity' => 2,
+    'complexity' => 2.4,
 
     // Luck of the game, from 0 (absolutely no luck in this game) to 5 (totally luck driven)
     'luck' => 1,
@@ -136,20 +136,10 @@ $gameinfos = array(
         //    totranslate("It was awarded best triangle game of the year in 2005 and nominated for the Spiel des Jahres."),
         //    ...
 
-        totranslate("This classic game for 2 players uses a deck of 20 cards."),
-        totranslate("To win, you must 'checkmate' your opponent in the perfect moment and score points!")
+        totranslate("Mate is a classic game of perfect information played with a 20 card deck."),
+        totranslate("The goal is to force a 'mate', a move that leaves no playable card in your opponent's hand."),
+        totranslate("The more tricks played before the mate, more points you score. Find the perfect moment to finish your opponent, or defend yourself from the worst scenario!")
     ),
-
-    // Games tags (categories)
-    //  You can attribute a maximum of ten "tags" for your game.
-    //  Each tag has a specific ID (ex: 22 for the category "Prototype", 101 for the tag "Science-fiction theme game")
-    //  Please see the "Game meta information" entry in the BGA Studio documentation for a full list of available tags:
-    //  https://en.doc.boardgamearena.com/Game_meta-information:_gameinfos.inc.php#Tags
-    //  IMPORTANT: this list should be ORDERED, with the most important tag first.
-    //  NOTE: tags are only read during the first deploy from the file gameinfos.inc.php; afterwards, BGA is responsible for setting tags for a game.
-
-    'tags' => array(2),
-
 
     //////// BGA SANDBOX ONLY PARAMETERS (DO NOT MODIFY)
 
