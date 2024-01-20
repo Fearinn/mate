@@ -80,7 +80,7 @@ $machinestates = array(
         "description" => "",
         "type" => "game",
         "action" => "stNewRound",
-        "transitions" => array("" => 32)
+        "transitions" => array("" => 30)
     ),
 
     // Trick

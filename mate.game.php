@@ -37,6 +37,7 @@ class Mate extends Table
             "trickSuit" => 11,
             "trickValue" => 12,
             "handsPlayed" => 13,
+            "firstPlayer" => 14,
             "privilege" => 100,
         ));
 
@@ -82,10 +83,10 @@ class Mate extends Table
 
         // Init global values with their initial values
 
-        // Set current trick suit to zero (= no trick suit)
         self::setGameStateInitialValue('trickSuit', 0);
         self::setGameStateInitialValue('trickValue', 0);
         self::setGameStateInitialValue('handsPlayed', 0);
+        self::setGameStateInitialValue('firstPlayer', 0);
 
         // Init game statistics
         // (note: statistics used in this file must be defined in your stats.inc.php file)
@@ -117,6 +118,7 @@ class Mate extends Table
 
         // Activate first player (which is in general a good idea :) )
         $this->activeNextPlayer();
+        self::setGameStateValue('firstPlayer', self::getActivePlayerId());
 
         /************ End of the game initialization *****/
     }
@@ -477,6 +479,7 @@ class Mate extends Table
                 // End of the trick
                 $this->gamestate->changeActivePlayer($best_value_player_id);
                 self::incStat(1, "tricks_number");
+                self::warn('new player active - end trick');
                 $this->gamestate->nextState("nextTrick");
             }
         } else {
@@ -484,6 +487,7 @@ class Mate extends Table
             // => just active the next player
             $player_id = self::activeNextPlayer();
             self::giveExtraTime($player_id);
+            self::warn('new player active - std');
             $this->gamestate->nextState('nextPlayer');
         }
     }
@@ -537,19 +541,35 @@ class Mate extends Table
             self::notifyAllPlayers("points", clienttranslate('Hand finished with no mate!'), array());
         }
 
-        $handsPlayed = self::getGameStateValue('handsPlayed');
-        self::setGameStateValue('handsPlayed', $handsPlayed + 1);
+        $prev_hands_played = self::getGameStateValue('handsPlayed');
+        self::setGameStateValue('handsPlayed', $prev_hands_played + 1);
+        $hands_played = self::getGameStateValue('handsPlayed');
+        self::warn($hands_played);
 
-        if (self::getGameStateValue('handsPlayed') == 2) {
+        $first_player = self::getGameStateValue('firstPlayer');
+        $other_player = $this->getOtherPlayer($players, $first_player);
+        self::warn($first_player);
+
+        if ($hands_played == 2) {
+            $this->gamestate->changeActivePlayer($other_player);
             $this->gamestate->nextState('newRound');
             return;
         }
 
-        if (self::getGameStateValue('handsPlayed') == 4) {
+        if ($hands_played == 4) {
             $this->gamestate->nextState('endGame');
             return;
         }
 
+        if ($hands_played == 1) {
+            $this->gamestate->changeActivePlayer($other_player);
+            self::warn($other_player);
+        }
+
+        if ($hands_played == 3) {
+            $this->gamestate->changeActivePlayer($first_player);
+            self::warn($first_player);
+        }
 
         $this->gamestate->nextState("newHand");
     }
