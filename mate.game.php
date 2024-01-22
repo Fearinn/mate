@@ -479,7 +479,6 @@ class Mate extends Table
                 // End of the trick
                 $this->gamestate->changeActivePlayer($best_value_player_id);
                 self::incStat(1, "tricks_number");
-                self::warn('new player active - end trick');
                 $this->gamestate->nextState("nextTrick");
             }
         } else {
@@ -487,7 +486,6 @@ class Mate extends Table
             // => just active the next player
             $player_id = self::activeNextPlayer();
             self::giveExtraTime($player_id);
-            self::warn('new player active - std');
             $this->gamestate->nextState('nextPlayer');
         }
     }
@@ -525,6 +523,7 @@ class Mate extends Table
             self::DbQuery($sql);
             self::notifyAllPlayers("points", clienttranslate('${player_name} mates with a ${card} after ${tricks} tricks, scoring ${points} points!'), array(
                 'player_id' => $winner_id, 'player_name' => $players[$winner_id]['player_name'],
+                'player_color' => $players[$winner_id]['player_color'],
                 'card' => $this->values_label[$checkmate_card['type_arg']],
                 'tricks' => $trick_nbr,
                 'points' => $points,
@@ -544,11 +543,8 @@ class Mate extends Table
         $prev_hands_played = self::getGameStateValue('handsPlayed');
         self::setGameStateValue('handsPlayed', $prev_hands_played + 1);
         $hands_played = self::getGameStateValue('handsPlayed');
-        self::warn($hands_played);
-
         $first_player = self::getGameStateValue('firstPlayer');
         $other_player = $this->getOtherPlayer($players, $first_player);
-        self::warn($first_player);
 
         if ($hands_played == 2) {
             $this->gamestate->changeActivePlayer($other_player);
@@ -563,12 +559,10 @@ class Mate extends Table
 
         if ($hands_played == 1) {
             $this->gamestate->changeActivePlayer($other_player);
-            self::warn($other_player);
         }
 
         if ($hands_played == 3) {
             $this->gamestate->changeActivePlayer($first_player);
-            self::warn($first_player);
         }
 
         $this->gamestate->nextState("newHand");

@@ -406,6 +406,7 @@ define([
       dojo.subscribe("newHand", this, "notif_newHand");
       dojo.subscribe("newScores", this, "notif_newScores");
       dojo.subscribe("points", this, "notif_points");
+      this.notifqueue.setSynchronous("points", 3000);
     },
 
     notif_newHand: function (notif) {
@@ -459,6 +460,12 @@ define([
       this.scoreCtrl[notif.args.player_id].toValue(notif.args.newScores);
     },
 
-    notif_points: function (notif) {},
+    notif_points: function (notif) {
+      this.displayScoring(
+        "playertablecard_" + notif.args.player_id,
+        notif.args.player_color,
+        notif.args.points
+      );
+    },
   });
 });
