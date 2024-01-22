@@ -20,14 +20,12 @@
   <!-- END playerhandblock -->
 </div>
 
-<div id="histories">
-  <h3>{PREVIOUSLY PLAYED CARDS}</h3>
-  <div class="whiteblock">
+<div id="history" class="whiteblock">
+  <h3>{PREVIOUSLY PLAYED TRICKS}</h3>
     <div id="historycards" class="historycards">
     <!-- BEGIN historycardsblock -->
       <div class="historycard historycard_{DIR}" id="historycard_{PLAYER_ID}_{NUM}" style="border-color: #{PLAYER_COLOR}"></div>
     <!-- END historycardsblock -->
-    </div>
   </div>
 </div>
 

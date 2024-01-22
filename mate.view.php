@@ -74,7 +74,7 @@ class view_mate_mate extends game_view
             }
         }
 
-        $this->tpl['PREVIOUSLY PLAYED CARDS'] = self::_("Previously played cards");
+        $this->tpl['PREVIOUSLY PLAYED TRICKS'] = self::_("Previously played tricks");
 
         /*
         
