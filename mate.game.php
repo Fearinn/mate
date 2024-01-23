@@ -590,10 +590,24 @@ class Mate extends Table
         $statename = $state['name'];
 
         if ($state['type'] === "activeplayer") {
-            switch ($statename) {
-                default:
-                    $this->gamestate->nextState("zombiePass");
-                    break;
+            self::warn('entered zombie mode');
+            if ($statename === "playerTurn") {
+                $order = 10 - $this->cards->countCardInLocation('hand', $active_player) + 1;
+                $cards = $this->cards->getCardsInLocation('hand', $active_player);
+
+                $currentTrickSuit = self::getGameStateValue('trickSuit');
+                $currentTrickValue = self::getGameStateValue('trickValue');
+
+                foreach ($cards as $card_id => $card) {
+                    if (!$currentTrickSuit || $card['type'] == $currentTrickSuit || $card['type_arg'] == $currentTrickValue) {
+                        try {
+                            $this->playCard($card_id, $order);
+                        } catch (Exception $e) {
+                        }
+                    }
+                }
+            } else {
+                $this->gamestate->nextState("zombiePass");
             }
 
             return;
