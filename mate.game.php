@@ -404,8 +404,10 @@ class Mate extends Table
         $currentTrickSuit = self::getGameStateValue('trickSuit');
         $currentTrickValue = self::getGameStateValue('trickValue');
 
+        $player_id = $this->getActivePlayerId();
+        self::giveExtraTime($player_id);
+
         if ($this->cards->countCardInLocation('cardsontable') == 1 && $currentTrickSuit && $currentTrickValue) {
-            $player_id = $this->getActivePlayerId();
             $next_player = $this->getOtherPlayer($players, $player_id);
 
             $can_play = false;
@@ -484,8 +486,7 @@ class Mate extends Table
         } else {
             // Standard case (not the end of the trick)
             // => just active the next player
-            $player_id = self::activeNextPlayer();
-            self::giveExtraTime($player_id);
+            self::activeNextPlayer();
             $this->gamestate->nextState('nextPlayer');
         }
     }
