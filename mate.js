@@ -33,6 +33,12 @@ define([
       this.cardwidth = 72;
       this.cardheight = 96;
       this.historyqtd = 0;
+      this.suitsstrength = {
+        1: 3,
+        2: 2,
+        3: 4,
+        4: 1,
+      };
     },
 
     /*
@@ -68,9 +74,16 @@ define([
           if (value == 7 || value == 10 || value >= 12) {
             // Build card type id
             var card_type_id = this.getCardUniqueId(suit, value);
+            var suit_strength = this.suitsstrength[suit];
+            var card_type_order = this.getCardUniqueId(suit_strength, value);
+
+            if (value === 10 || value === 14) {
+              card_type_order = this.getCardUniqueId(suit_strength, value + 4);
+            }
+
             this.playerHand.addItemType(
               card_type_id,
-              card_type_id,
+              card_type_order,
               g_gamethemeurl + "img/cards.jpg",
               card_type_id
             );
