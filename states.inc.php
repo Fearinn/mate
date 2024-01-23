@@ -80,6 +80,7 @@ $machinestates = array(
         "description" => "",
         "type" => "game",
         "action" => "stNewRound",
+        "updateGameProgression" => true,
         "transitions" => array("" => 30)
     ),
 
@@ -111,7 +112,7 @@ $machinestates = array(
     // End of the hand (scoring, etc...)
     40 => array(
         "name" => "endHand",
-        "description" => clienttranslate(`It's a checkmate!`),
+        "description" => "",
         "type" => "game",
         "action" => "stEndHand",
         "transitions" => array("newHand" => 2, "newRound" => 3, "endGame" => 99)
