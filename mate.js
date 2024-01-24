@@ -24,8 +24,6 @@ define([
 ], function (dojo, declare) {
   return declare("bgagame.mate", ebg.core.gamegui, {
     constructor: function () {
-      console.log("mate constructor");
-
       // Here, you can init the global variables of your user interface
       // Example:
       // this.myGlobalValue = 0;
@@ -55,8 +53,6 @@ define([
         */
 
     setup: function (gamedatas) {
-      console.log("Starting game setup");
-
       this.playerHand = new ebg.stock(); // new stock object for hand
 
       this.playerHand.create(
@@ -136,8 +132,6 @@ define([
 
       // Setup game notifications to handle (see "setupNotifications" method below)
       this.setupNotifications();
-
-      console.log("Ending game setup");
     },
 
     ///////////////////////////////////////////////////
@@ -147,8 +141,6 @@ define([
     //                  You can use this method to perform some user interface changes at this moment.
     //
     onEnteringState: function (stateName, args) {
-      console.log("Entering state: " + stateName);
-
       switch (stateName) {
         /* Example:
             
@@ -169,8 +161,6 @@ define([
     //                 You can use this method to perform some user interface changes at this moment.
     //
     onLeavingState: function (stateName) {
-      console.log("Leaving state: " + stateName);
-
       switch (stateName) {
         /* Example:
             
@@ -191,8 +181,6 @@ define([
     //                        action status bar (ie: the HTML links in the status bar).
     //
     onUpdateActionButtons: function (stateName, args) {
-      console.log("onUpdateActionButtons: " + stateName);
-
       if (this.isCurrentPlayerActive()) {
         switch (
           stateName
@@ -336,40 +324,6 @@ define([
       }
     },
 
-    /* Example:
-        
-        onMyMethodToCall1: function( evt )
-        {
-            console.log( 'onMyMethodToCall1' );
-            
-            // Preventing default browser reaction
-            dojo.stopEvent( evt );
-
-            // Check that this action is possible (see "possibleactions" in states.inc.php)
-            if( ! this.checkAction( 'myAction' ) )
-            {   return; }
-
-            this.ajaxcall( "/mate/mate/myAction.html", { 
-                                                                    lock: true, 
-                                                                    myArgument1: arg1, 
-                                                                    myArgument2: arg2,
-                                                                    ...
-                                                                 }, 
-                         this, function( result ) {
-                            
-                            // What to do after the server call if it succeeded
-                            // (most of the time: nothing)
-                            
-                         }, function( is_error) {
-
-                            // What to do after the server call in anyway (success or failure)
-                            // (most of the time: nothing)
-
-                         } );        
-        },        
-        
-        */
-
     ///////////////////////////////////////////////////
     //// Reaction to cometD notifications
 
@@ -383,10 +337,8 @@ define([
         
         */
     setupNotifications: function () {
-      console.log("notifications subscriptions setup");
       // Example 1: standard notification handling
       // dojo.subscribe( 'cardPlayed', this, "notif_cardPlayed" );
-
       // Example 2: standard notification handling + tell the user interface to wait
       //            during 3 seconds after calling the method in order to let the players
       //            see what is happening in the game.
@@ -394,24 +346,8 @@ define([
       // this.notifqueue.setSynchronous( 'cardPlayed', 3000 );
       //
     },
-    /*
-        Example:
-        
-        notif_cardPlayed: function( notif )
-        {
-            console.log( 'notif_cardPlayed' );
-            console.log( notif );
-            
-            // Note: notif.args contains the arguments specified during you "notifyAllPlayers" / "notifyPlayer" PHP call
-            
-            // TODO: play the card in the user interface.
-        },    
-        
-        */
 
     setupNotifications: function () {
-      console.log("notifications subscriptions setup");
-
       dojo.subscribe("playCard", this, "notif_playCard");
       dojo.subscribe("trickWin", this, "notif_trickWin");
       this.notifqueue.setSynchronous("trickWin", 1000);

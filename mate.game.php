@@ -591,7 +591,6 @@ class Mate extends Table
         $statename = $state['name'];
 
         if ($state['type'] === "activeplayer") {
-            self::warn('entered zombie mode');
             if ($statename === "playerTurn") {
                 $order = 10 - $this->cards->countCardInLocation('hand', $active_player) + 1;
                 $cards = $this->cards->getCardsInLocation('hand', $active_player);
