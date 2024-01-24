@@ -46,12 +46,9 @@ class view_mate_mate extends game_view
 
         $template = self::getGameName() . "_" . self::getGameName();
 
-        $directions = array('N', 'S');
-
         // this will inflate our player block with actual players data
         $this->page->begin_block($template, "playerhandblock");
         foreach ($players as $player_id => $info) {
-
             $this->page->insert_block("playerhandblock", array(
                 "PLAYER_ID" => $player_id,
                 "PLAYER_NAME" => $players[$player_id]['player_name'],
@@ -63,12 +60,10 @@ class view_mate_mate extends game_view
 
         $this->page->begin_block($template, "historycardsblock");
         foreach ($players as $player_id => $info) {
-            $dir = array_shift($directions);
             for ($i = 1; $i <= 10; $i++) {
                 $this->page->insert_block("historycardsblock", array(
                     "PLAYER_ID" => $player_id,
                     "NUM" => $i,
-                    "DIR" => $dir,
                     "PLAYER_COLOR" => $players[$player_id]['player_color'],
                 ));
             }

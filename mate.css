@@ -48,24 +48,24 @@
 
 /** Table layout **/
 
-#playertables {
+#mate_playertables {
   display: flex;
   position: relative;
   gap: 1rem;
   justify-content: center;
 }
 
-.playertablename {
+.mate_playertablename {
   font-weight: bold;
 }
 
-.playertable {
+.mate_playertable {
   text-align: center;
   width: 100px;
   height: 110px;
 }
 
-.playertablecard {
+.mate_playertablecard {
   display: inline-block;
   position: relative;
   margin-top: 5px;
@@ -75,26 +75,26 @@
 
 /*** cards on table ***/
 
-.cardontable {
+.mate_cardontable {
   position: absolute;
   width: 72px;
   height: 96px;
   background-image: url("img/cards.jpg");
 }
 
-#history {
+#mate_history {
   margin-bottom: 8px;
   overflow-x: auto;
 }
 
-.historycards {
+.mate_historycards {
   display: grid;
   grid-template-columns: repeat(10, 80px);
   grid-template-rows: repeat(2, 105px);
   gap: 0.5rem;
 }
 
-.cardonhistory {
+.mate_cardonhistory {
   position: absolute;
   width: 72px;
   height: 96px;
@@ -103,7 +103,7 @@
   left: 2px !important;
 }
 
-.historycard {
+.mate_historycard {
   position: relative;
   border-style: solid;
   border-width: 2px;

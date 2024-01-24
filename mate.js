@@ -236,14 +236,14 @@ define([
           y: this.cardheight * (suit - 1),
           player_id: player_id,
         }),
-        "playertablecard_" + player_id
+        "mate_playertablecard_" + player_id
       );
 
       if (player_id != this.player_id) {
         // Some opponent played a card
         // Move card from player panel
         this.placeOnObject(
-          "cardontable_" + player_id,
+          "mate_cardontable_" + player_id,
           "overall_player_board_" + player_id
         );
       } else {
@@ -252,7 +252,7 @@ define([
 
         if ($("myhand_item_" + card_id)) {
           this.placeOnObject(
-            "cardontable_" + player_id,
+            "mate_cardontable_" + player_id,
             "myhand_item_" + card_id
           );
           this.playerHand.removeFromStockById(card_id);
@@ -261,8 +261,8 @@ define([
 
       // In any case: move it to its final destination
       this.slideToObject(
-        "cardontable_" + player_id,
-        "playertablecard_" + player_id
+        "mate_cardontable_" + player_id,
+        "mate_playertablecard_" + player_id
       ).play();
     },
 
@@ -278,13 +278,13 @@ define([
           player_id: player_id,
           num: trick_num,
         }),
-        "historycard_" + player_id + "_" + trick_num
+        "mate_historycard_" + player_id + "_" + trick_num
       );
 
       // In any case: move it to its final destination
       this.slideToObject(
-        "cardonhistory_" + player_id + "_" + trick_num,
-        "historycard_" + player_id + "_" + trick_num
+        "mate_cardonhistory_" + player_id + "_" + trick_num,
+        "mate_historycard_" + player_id + "_" + trick_num
       ).play();
     },
 
@@ -436,10 +436,10 @@ define([
       }
 
       for (var player_id in this.gamedatas.players) {
-        dojo.destroy("cardontable_" + player_id);
+        dojo.destroy("mate_cardontable_" + player_id);
 
         for (var i = 0; i <= 10; i++) {
-          dojo.destroy("cardonhistory_" + player_id + "_" + i);
+          dojo.destroy("mate_cardonhistory_" + player_id + "_" + i);
         }
       }
 
@@ -465,7 +465,7 @@ define([
         notif.args.value
       );
 
-      dojo.destroy("cardontable_" + notif.args.player_id);
+      dojo.destroy("mate_cardontable_" + notif.args.player_id);
     },
 
     notif_newScores: function (notif) {
@@ -475,7 +475,7 @@ define([
 
     notif_points: function (notif) {
       this.displayScoring(
-        "playertablecard_" + notif.args.player_id,
+        "mate_playertablecard_" + notif.args.player_id,
         notif.args.player_color,
         notif.args.points
       );

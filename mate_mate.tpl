@@ -9,22 +9,22 @@
 -- See http://en.boardgamearena.com/#!doc/Studio for more information.
 -------
 -->
-<div id="playertables">
+<div id="mate_playertables">
   <!-- BEGIN playerhandblock -->
-  <div class="playertable whiteblock playertable_{DIR}">
-    <div class="playertablename" style="color: #{PLAYER_COLOR}">
+  <div class="mate_playertable whiteblock">
+    <div class="mate_playertablename" style="color: #{PLAYER_COLOR}">
       {PLAYER_NAME}
     </div>
-    <div class="playertablecard" id="playertablecard_{PLAYER_ID}"></div>
+    <div class="mate_playertablecard" id="mate_playertablecard_{PLAYER_ID}"></div>
   </div>
   <!-- END playerhandblock -->
 </div>
 
-<div id="history" class="whiteblock">
+<div id="mate_history" class="whiteblock">
   <h3>{PREVIOUSLY PLAYED TRICKS}</h3>
-    <div id="historycards" class="historycards">
+    <div id="mate_historycards" class="mate_historycards">
     <!-- BEGIN historycardsblock -->
-      <div class="historycard historycard_{DIR}" id="historycard_{PLAYER_ID}_{NUM}" style="border-color: #{PLAYER_COLOR}"></div>
+      <div class="mate_historycard" id="mate_historycard_{PLAYER_ID}_{NUM}" style="border-color: #{PLAYER_COLOR}"></div>
     <!-- END historycardsblock -->
   </div>
 </div>
@@ -38,11 +38,11 @@
     // Javascript HTML templates
 
     var jstpl_cardontable =
-      '<div class="cardontable" id="cardontable_${player_id}" style="background-position:-${x}px -${y}px">\
+      '<div class="mate_cardontable" id="mate_cardontable_${player_id}" style="background-position:-${x}px -${y}px">\
                         </div>';
 
     var jstpl_cardonhistory =
-      '<div class="cardonhistory" id="cardonhistory_${player_id}_${num}" style="background-position:-${x}px -${y}px">\
+      '<div class="mate_cardonhistory" id="mate_cardonhistory_${player_id}_${num}" style="background-position:-${x}px -${y}px">\
                         </div>';
   </script>
 
