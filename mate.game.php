@@ -33,7 +33,7 @@ class Mate extends Table
         // Note: afterwards, you can get/set the global variables with getGameStateValue/setGameStateInitialValue/setGameStateValue
         parent::__construct();
 
-        self::initGameStateLabels(array(
+        $this->initGameStateLabels(array(
             "trickSuit" => 11,
             "trickValue" => 12,
             "handsPlayed" => 13,
@@ -41,7 +41,7 @@ class Mate extends Table
             "privilege" => 100,
         ));
 
-        $this->cards = self::getNew("module.common.deck");
+        $this->cards = $this->getNew("module.common.deck");
         $this->cards->init("card");
     }
 
@@ -63,7 +63,7 @@ class Mate extends Table
         // Set the colors of the players with HTML color code
         // The default below is red/green/blue/orange/brown
         // The number of colors defined here must correspond to the maximum number of players allowed for the gams
-        $gameinfos = self::getGameinfos();
+        $gameinfos = $this->getGameinfos();
         $default_colors = $gameinfos['player_colors'];
 
         // Create players
@@ -75,26 +75,26 @@ class Mate extends Table
             $values[] = "('" . $player_id . "','$color','" . $player['player_canal'] . "','" . addslashes($player['player_name']) . "','" . addslashes($player['player_avatar']) . "')";
         }
         $sql .= implode(',', $values);
-        self::DbQuery($sql);
-        self::reattributeColorsBasedOnPreferences($players, $gameinfos['player_colors']);
-        self::reloadPlayersBasicInfos();
+        $this->DbQuery($sql);
+        $this->reattributeColorsBasedOnPreferences($players, $gameinfos['player_colors']);
+        $this->reloadPlayersBasicInfos();
 
         /************ Start the game initialization *****/
 
         // Init global values with their initial values
 
-        self::setGameStateInitialValue('trickSuit', 0);
-        self::setGameStateInitialValue('trickValue', 0);
-        self::setGameStateInitialValue('handsPlayed', 0);
-        self::setGameStateInitialValue('firstPlayer', 0);
+        $this->setGameStateInitialValue('trickSuit', 0);
+        $this->setGameStateInitialValue('trickValue', 0);
+        $this->setGameStateInitialValue('handsPlayed', 0);
+        $this->setGameStateInitialValue('firstPlayer', 0);
 
         // Init game statistics
         // (note: statistics used in this file must be defined in your stats.inc.php file)
 
-        self::initStat("table", "tricks_number", 0);
-        self::initStat("table", "fewer_tricks_mate", 0);
-        self::initStat("table", "most_tricks_mate", 0);
-        self::initStat("player", "tricks_won", 0);
+        $this->initStat("table", "tricks_number", 0);
+        $this->initStat("table", "fewer_tricks_mate", 0);
+        $this->initStat("table", "most_tricks_mate", 0);
+        $this->initStat("player", "tricks_won", 0);
 
         // Create cards
         $cards = array();
@@ -111,14 +111,14 @@ class Mate extends Table
         $this->cards->shuffle('deck');
 
         // Deal 10 cards to each players
-        $players = self::loadPlayersBasicInfos();
+        $players = $this->loadPlayersBasicInfos();
         foreach ($players as $player_id => $player) {
             $cards = $this->cards->pickCards(10, 'deck', $player_id);
         }
 
         // Activate first player (which is in general a good idea :) )
         $this->activeNextPlayer();
-        self::setGameStateValue('firstPlayer', self::getActivePlayerId());
+        $this->setGameStateValue('firstPlayer', $this->getActivePlayerId());
 
         /************ End of the game initialization *****/
     }
@@ -136,14 +136,14 @@ class Mate extends Table
     {
         $result = array();
 
-        $current_player_id = self::getCurrentPlayerId();    // !! We must only return informations visible by this player !!
+        $current_player_id = $this->getCurrentPlayerId();    // !! We must only return informations visible by this player !!
 
-        $players = self::loadPlayersBasicInfos();
+        $players = $this->loadPlayersBasicInfos();
 
         // Get information about players
         // Note: you can retrieve some extra field you added for "player" table in "dbmodel.sql" if you need it.
         $sql = "SELECT player_id id, player_score score FROM player ";
-        $result['players'] = self::getCollectionFromDb($sql);
+        $result['players'] = $this->getCollectionFromDb($sql);
 
         // Cards in player hand
         $result['hand'] = $this->cards->getCardsInLocation('hand', $current_player_id);
@@ -153,7 +153,7 @@ class Mate extends Table
 
         foreach ($players as $player_id => $info) {
             $sql = "SELECT card_order, card_location, card_location_arg, card_type, card_type_arg FROM card WHERE card_location_arg='$player_id' AND card_location='cardswon'";
-            $result['cardswon'][$player_id] = self::getCollectionFromDb($sql);
+            $result['cardswon'][$player_id] = $this->getCollectionFromDb($sql);
         }
 
         return $result;
@@ -171,7 +171,7 @@ class Mate extends Table
     */
     function getGameProgression()
     {
-        $handsPlayed = self::getGameStateValue("handsPlayed");
+        $handsPlayed = $this->getGameStateValue("handsPlayed");
 
         return $handsPlayed * 25;
     }
@@ -205,20 +205,20 @@ class Mate extends Table
 
     function playCard($card_id, $order)
     {
-        self::checkAction("playCard");
-        $player_id = self::getActivePlayerId();
+        $this->checkAction("playCard");
+        $player_id = $this->getActivePlayerId();
 
         $currentCard = $this->cards->getCard($card_id);
 
-        $currentTrickSuit = self::getGameStateValue('trickSuit');
-        $currentTrickValue = self::getGameStateValue('trickValue');
-        $privilege = self::getGameStateValue('privilege');
+        $currentTrickSuit = $this->getGameStateValue('trickSuit');
+        $currentTrickValue = $this->getGameStateValue('trickValue');
+        $privilege = $this->getGameStateValue('privilege');
 
         $hand = $this->cards->getCardsInLocation('hand', $player_id);
 
         if (!$currentTrickSuit || !$currentTrickValue) {
-            self::setGameStateValue('trickSuit', $currentCard['type']);
-            self::setGameStateValue('trickValue', $currentCard['type_arg']);
+            $this->setGameStateValue('trickSuit', $currentCard['type']);
+            $this->setGameStateValue('trickValue', $currentCard['type_arg']);
         }
 
         if ($currentTrickSuit && $currentTrickValue && $currentCard) {
@@ -228,7 +228,7 @@ class Mate extends Table
 
 
             if ($currentTrickSuit != $currentCard['type'] && $currentCard['type_arg'] != $currentTrickValue) {
-                throw new BgaUserException(self::_("You can't play this card now"));
+                throw new BgaUserException($this->_("You can't play this card now"));
             }
 
             foreach ($hand as $card) {
@@ -246,11 +246,11 @@ class Mate extends Table
             }
 
             if (($privilege == 1 || $privilege == 2) && $k_in_hand && $currentTrickValue == 13 && $currentCard['type_arg'] != 13) {
-                throw new BgaUserException(self::_("You must play a K card"));
+                throw new BgaUserException($this->_("You must play a K card"));
             }
 
             if ($privilege == 2 && $q_in_hand && $currentTrickValue == 12 && $currentCard['type_arg'] != 12) {
-                throw new BgaUserException(self::_("You must play a Q card"));
+                throw new BgaUserException($this->_("You must play a Q card"));
             }
 
             if (
@@ -258,21 +258,21 @@ class Mate extends Table
                 && !($currentTrickValue == 13 && $currentCard['type_arg'] == 13 && ($privilege == 1 || $privilege == 2))
                 && !($currentTrickValue == 12 && $currentCard['type_arg'] == 12 && $privilege == 2)
             ) {
-                throw new BgaUserException(self::_("You must play a card of the current suit"));
+                throw new BgaUserException($this->_("You must play a card of the current suit"));
             }
         }
 
         $this->cards->moveCard($card_id, 'cardsontable', $player_id);
 
         // And notify
-        self::notifyAllPlayers('playCard', clienttranslate('${player_name} plays ${value_displayed} ${suit_displayed}'), array(
+        $this->notifyAllPlayers('playCard', clienttranslate('${player_name} plays ${value_displayed} ${suit_displayed}'), array(
             'i18n' => array('suit_displayed', 'value_displayed'), 'card_id' => $card_id, 'player_id' => $player_id,
-            'player_name' => self::getActivePlayerName(), 'value' => $currentCard['type_arg'],
+            'player_name' => $this->getActivePlayerName(), 'value' => $currentCard['type_arg'],
             'value_displayed' => $this->values_label[$currentCard['type_arg']], 'suit' => $currentCard['type'],
             'suit_displayed' => $this->suits[$currentCard['type']]['name']
         ));
         $sql = "UPDATE card SET card_order=$order WHERE card_id='$card_id'";
-        self::DbQuery($sql);
+        $this->DbQuery($sql);
         // Next player
         $this->gamestate->nextState('playCard');
     }
@@ -282,55 +282,15 @@ class Mate extends Table
     //////////// Game state arguments
     ////////////
 
-    /*
-        Here, you can create methods defined as "game state arguments" (see "args" property in states.inc.php).
-        These methods function is to return some additional information that is specific to the current
-        game state.
-    */
-
-    /*
-    
-    Example for game state "MyGameState":
-    
-    function argMyGameState()
-    {
-        // Get some values from the current game situation in database...
-    
-        // return values:
-        return array(
-            'variable1' => $value1,
-            'variable2' => $value2,
-            ...
-        );
-    }    
-    */
-
     //////////////////////////////////////////////////////////////////////////////
     //////////// Game state actions
     ////////////
 
-    /*
-        Here, you can create methods defined as "game state actions" (see "action" property in states.inc.php).
-        The action method of state X is called everytime the current game state is set to X.
-    */
-
-    /*
-    
-    Example for game state "MyGameState":
-
-    function stMyGameState()
-    {
-        // Do some stuff ...
-        
-        // (very often) go to another gamestate
-        $this->gamestate->nextState( 'some_gamestate_transition' );
-    }    
-    */
 
     function stNewHand()
     {
-        if (self::getGameStateValue('handsPlayed') > 0) {
-            $players = self::loadPlayersBasicInfos();
+        if ($this->getGameStateValue('handsPlayed') > 0) {
+            $players = $this->loadPlayersBasicInfos();
 
             foreach ($players as $player_id => $player) {
                 $other_player = $this->getOtherPlayer($players, $player_id);
@@ -343,8 +303,7 @@ class Mate extends Table
                 $this->cards->moveAllCardsInLocation('temporary', 'hand', $player_id, $player_id);
 
                 $cards = $this->cards->getPlayerHand($player_id);
-                // Notify player about his cards
-                self::notifyPlayer($player_id, 'newHand', clienttranslate('A new hand starts. Players exchange hands.'), array('cards' => $cards));
+                $this->notifyPlayer($player_id, 'newHand', clienttranslate('A new hand starts. Players exchange hands.'), array('cards' => $cards));
             }
         }
 
@@ -353,7 +312,7 @@ class Mate extends Table
 
     function stNewRound()
     {
-        $players = self::loadPlayersBasicInfos();
+        $players = $this->loadPlayersBasicInfos();
 
         $this->cards->moveAllCardsInLocation('hand', 'deck');
         $this->cards->moveAllCardsInLocation('cardswon', 'deck');
@@ -362,7 +321,7 @@ class Mate extends Table
 
         foreach ($players as $player_id => $player) {
             $cards = $this->cards->pickCards(10, 'deck', $player_id);
-            self::notifyPlayer($player_id, 'newHand', clienttranslate('A new round starts. Cards are shuffled and dealt again.'), array('cards' => $cards));
+            $this->notifyPlayer($player_id, 'newHand', clienttranslate('A new round starts. Cards are shuffled and dealt again.'), array('cards' => $cards));
         }
 
         $this->gamestate->nextState("");
@@ -372,7 +331,7 @@ class Mate extends Table
     {
 
         if ($this->cards->countCardInLocation('cardsontable') == 2) {
-            $players = self::loadPlayersBasicInfos();
+            $players = $this->loadPlayersBasicInfos();
 
             foreach ($players as $player_id => $player) {
                 $cards_on_table = $this->cards->getCardsInLocation('cardsontable', $player_id);
@@ -380,7 +339,7 @@ class Mate extends Table
 
                 $this->cards->moveAllCardsInLocation('cardsontable', 'cardswon', $player_id, $player_id);
 
-                self::notifyAllPlayers('newTrick', '', array(
+                $this->notifyAllPlayers('newTrick', '', array(
                     'player_id' => $player_id,
                     'suit' => $card['type'],
                     'value' => $card['type_arg'],
@@ -388,24 +347,20 @@ class Mate extends Table
             }
         }
 
-        // Reset trick suit and trick value to 0 (= no suit and no value)
-
-        self::setGameStateValue('trickSuit', 0);
-        self::setGameStateValue('trickValue', 0);
+        $this->setGameStateValue('trickSuit', 0);
+        $this->setGameStateValue('trickValue', 0);
         $this->gamestate->nextState("");
     }
 
     function stNextPlayer()
     {
-        // Active next player OR end the trick and go to the next trick OR end the hand
+        $players = $this->loadPlayersBasicInfos();
 
-        $players = self::loadPlayersBasicInfos();
-
-        $currentTrickSuit = self::getGameStateValue('trickSuit');
-        $currentTrickValue = self::getGameStateValue('trickValue');
+        $currentTrickSuit = $this->getGameStateValue('trickSuit');
+        $currentTrickValue = $this->getGameStateValue('trickValue');
 
         $player_id = $this->getActivePlayerId();
-        self::giveExtraTime($player_id);
+        $this->giveExtraTime($player_id);
 
         if ($this->cards->countCardInLocation('cardsontable') == 1 && $currentTrickSuit && $currentTrickValue) {
             $next_player = $this->getOtherPlayer($players, $player_id);
@@ -427,11 +382,10 @@ class Mate extends Table
         }
 
         if ($this->cards->countCardInLocation('cardsontable') == 2) {
-            // This is the end of the trick
             $cards_on_table = $this->cards->getCardsInLocation('cardsontable');
             $best_value_player_id = null;
-            $currentTrickSuit = self::getGameStateValue('trickSuit');
-            $currentTrickValue = self::getGameStateValue('trickValue');
+            $currentTrickSuit = $this->getGameStateValue('trickSuit');
+            $currentTrickValue = $this->getGameStateValue('trickValue');
 
             $same_suit = true;
             foreach ($cards_on_table as $card) {
@@ -462,14 +416,11 @@ class Mate extends Table
                 }
             }
 
-            // Active this player => he's the one who starts the next tric
+            $this->incStat(1, "tricks_won", $best_value_player_id);
 
-            self::incStat(1, "tricks_won", $best_value_player_id);
+            $players = $this->loadPlayersBasicInfos();
 
-            $players = self::loadPlayersBasicInfos();
-
-            // Notify
-            self::notifyAllPlayers('trickWin', clienttranslate('${best_player_name} wins the trick'), array(
+            $this->notifyAllPlayers('trickWin', clienttranslate('${best_player_name} wins the trick'), array(
                 'best_player_id' => $best_value_player_id,
                 'best_player_name' => $players[$best_value_player_id]['player_name'],
             ));
@@ -480,13 +431,13 @@ class Mate extends Table
             } else {
                 // End of the trick
                 $this->gamestate->changeActivePlayer($best_value_player_id);
-                self::incStat(1, "tricks_number");
+                $this->incStat(1, "tricks_number");
                 $this->gamestate->nextState("nextTrick");
             }
         } else {
             // Standard case (not the end of the trick)
             // => just active the next player
-            self::activeNextPlayer();
+            $this->activeNextPlayer();
             $this->gamestate->nextState('nextPlayer');
         }
     }
@@ -494,7 +445,7 @@ class Mate extends Table
 
     function stEndHand()
     {
-        $players = self::loadPlayersBasicInfos();
+        $players = $this->loadPlayersBasicInfos();
 
         $cards = $this->cards->getCardsInLocation("cardswon");
         $cards_on_table = $this->cards->getCardsInLocation("cardsontable");
@@ -509,20 +460,19 @@ class Mate extends Table
 
         $points = $checkmate_weight * $trick_nbr;
 
-        // Apply scores to player
         if ($points && $this->cards->countCardInLocation("hand") > 0) {
 
-            if (!self::getStat("fewer_tricks_mate") || $trick_nbr < self::getStat("fewer_tricks_mate")) {
-                self::setStat($trick_nbr, "fewer_tricks_mate");
+            if (!$this->getStat("fewer_tricks_mate") || $trick_nbr < $this->getStat("fewer_tricks_mate")) {
+                $this->setStat($trick_nbr, "fewer_tricks_mate");
             }
 
-            if ($trick_nbr > self::getStat("most_tricks_mate")) {
-                self::setStat($trick_nbr, "most_tricks_mate");
+            if ($trick_nbr > $this->getStat("most_tricks_mate")) {
+                $this->setStat($trick_nbr, "most_tricks_mate");
             }
 
             $sql = "UPDATE player SET player_score=player_score+$points WHERE player_id='$winner_id'";
-            self::DbQuery($sql);
-            self::notifyAllPlayers("points", clienttranslate('${player_name} mates with a ${card} after ${tricks} tricks, scoring ${points} points!'), array(
+            $this->DbQuery($sql);
+            $this->notifyAllPlayers("points", clienttranslate('${player_name} mates with a ${card} after ${tricks} tricks, scoring ${points} points!'), array(
                 'player_id' => $winner_id, 'player_name' => $players[$winner_id]['player_name'],
                 'player_color' => $players[$winner_id]['player_color'],
                 'card' => $this->values_label[$checkmate_card['type_arg']],
@@ -531,20 +481,20 @@ class Mate extends Table
             ));
 
             $score = 0;
-            $collection = self::getCollectionFromDb("SELECT player_score FROM player WHERE player_id='$winner_id'");
+            $collection = $this->getCollectionFromDb("SELECT player_score FROM player WHERE player_id='$winner_id'");
             foreach ($collection as $info) {
                 $score = $info['player_score'];
             }
 
-            self::notifyAllPlayers("newScores", '', array('player_id' => $winner_id, 'newScores' => $score));
+            $this->notifyAllPlayers("newScores", '', array('player_id' => $winner_id, 'newScores' => $score));
         } else {
-            self::notifyAllPlayers("points", clienttranslate('Hand finished with no mate!'), array());
+            $this->notifyAllPlayers("points", clienttranslate('Hand finished with no mate!'), array());
         }
 
-        $prev_hands_played = self::getGameStateValue('handsPlayed');
-        self::setGameStateValue('handsPlayed', $prev_hands_played + 1);
-        $hands_played = self::getGameStateValue('handsPlayed');
-        $first_player = self::getGameStateValue('firstPlayer');
+        $prev_hands_played = $this->getGameStateValue('handsPlayed');
+        $this->setGameStateValue('handsPlayed', $prev_hands_played + 1);
+        $hands_played = $this->getGameStateValue('handsPlayed');
+        $first_player = $this->getGameStateValue('firstPlayer');
         $other_player = $this->getOtherPlayer($players, $first_player);
 
         if ($hands_played == 2) {
@@ -573,19 +523,6 @@ class Mate extends Table
     //////////// Zombie
     ////////////
 
-    /*
-        zombieTurn:
-        
-        This method is called each time it is the turn of a player who has quit the game (= "zombie" player).
-        You can do whatever you want in order to make sure the turn of this player ends appropriately
-        (ex: pass).
-        
-        Important: your zombie code will be called when the player leaves the game. This action is triggered
-        from the main site and propagated to the gameserver from a server, not from a browser.
-        As a consequence, there is no current player associated to this action. In your zombieTurn function,
-        you must _never_ use getCurrentPlayerId() or getCurrentPlayerName(), otherwise it will fail with a "Not logged" error message. 
-    */
-
     function zombieTurn($state, $active_player)
     {
         $statename = $state['name'];
@@ -595,8 +532,8 @@ class Mate extends Table
                 $order = 10 - $this->cards->countCardInLocation('hand', $active_player) + 1;
                 $cards = $this->cards->getCardsInLocation('hand', $active_player);
 
-                $currentTrickSuit = self::getGameStateValue('trickSuit');
-                $currentTrickValue = self::getGameStateValue('trickValue');
+                $currentTrickSuit = $this->getGameStateValue('trickSuit');
+                $currentTrickValue = $this->getGameStateValue('trickValue');
 
                 foreach ($cards as $card_id => $card) {
                     if (!$currentTrickSuit || $card['type'] == $currentTrickSuit || $card['type_arg'] == $currentTrickValue) {
@@ -614,7 +551,6 @@ class Mate extends Table
         }
 
         if ($state['type'] === "multipleactiveplayer") {
-            // Make sure player is in a non blocking status for role turn
             $this->gamestate->setPlayerNonMultiactive($active_player, '');
 
             return;
@@ -650,14 +586,14 @@ class Mate extends Table
         //            // ! important ! Use DBPREFIX_<table_name> for all tables
         //
         //            $sql = "ALTER TABLE DBPREFIX_xxxxxxx ....";
-        //            self::applyDbUpgradeToAllDB( $sql );
+        //            $this->applyDbUpgradeToAllDB( $sql );
         //        }
         //        if( $from_version <= 1405061421 )
         //        {
         //            // ! important ! Use DBPREFIX_<table_name> for all tables
         //
         //            $sql = "CREATE TABLE DBPREFIX_xxxxxxx ....";
-        //            self::applyDbUpgradeToAllDB( $sql );
+        //            $this->applyDbUpgradeToAllDB( $sql );
         //        }
         //        // Please add your future database scheme changes here
         //

@@ -37,33 +37,13 @@ class action_mate extends APP_GameAction
     }
   }
 
-  /*
-    
-    Example:
-  	
-    public function myAction()
-    {
-        self::setAjaxMode();     
-
-        // Retrieve arguments
-        // Note: these arguments correspond to what has been sent through the javascript "ajaxcall" method
-        $arg1 = self::getArg( "myArgument1", AT_posint, true );
-        $arg2 = self::getArg( "myArgument2", AT_posint, true );
-
-        // Then, call the appropriate method in your game logic, like "playCard" or "myAction"
-        $this->game->myAction( $arg1, $arg2 );
-
-        self::ajaxResponse( );
-    }
-    
-    */
 
   public function playCard()
   {
-    self::setAjaxMode();
-    $card_id = self::getArg("id", AT_posint, true);
-    $card_order = self::getArg('order', AT_int, true);
+    $this->setAjaxMode();
+    $card_id = $this->getArg("id", AT_posint, true);
+    $card_order = $this->getArg('order', AT_int, true);
     $this->game->playCard($card_id, $card_order);
-    self::ajaxResponse();
+    $this->ajaxResponse();
   }
 }
