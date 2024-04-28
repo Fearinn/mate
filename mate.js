@@ -40,7 +40,7 @@ define([
 
       this.playerHand.create(
         this,
-        $("myhand"),
+        $("mate_myhand"),
         this.cardWidth,
         this.cardHeight
       );
@@ -117,16 +117,25 @@ define([
     //// Game & client states
 
     onEnteringState: function (stateName, args) {
-      switch (stateName) {
-        case "dummmy":
-          break;
+      if (stateName === "playerTurn") {
+        if (this.isCurrentPlayerActive()) {
+          var player_id = this.player_id;
+          var playableCards = args.args.playableCards[player_id];
+          var hand = this.playerHand.getAllItems();
+
+          dojo.query(".stockitem").forEach((element) => {
+            var itemId = element.id.split("item_")[1];
+            if (!playableCards[itemId]) {
+              dojo.addClass(element, "mate_unselectable");
+            }
+          });
+        }
       }
     },
 
     onLeavingState: function (stateName) {
-      switch (stateName) {
-        case "dummmy":
-          break;
+      if (stateName === "playerTurn") {
+        dojo.query(".stockitem").removeClass("mate_unselectable");
       }
     },
 
@@ -160,10 +169,10 @@ define([
           "overall_player_board_" + player_id
         );
       } else {
-        if ($("myhand_item_" + card_id)) {
+        if ($("mate_myhand_item_" + card_id)) {
           this.placeOnObject(
             "mate_cardontable_" + player_id,
-            "myhand_item_" + card_id
+            "mate_myhand_item_" + card_id
           );
           this.playerHand.removeFromStockById(card_id);
         }
@@ -206,7 +215,6 @@ define([
       if (items.length > 0) {
         var action = "playCard";
         if (this.checkAction(action, true)) {
-          // Can play a card
           var card_id = items[0].id;
           this.ajaxcall(
             "/" +

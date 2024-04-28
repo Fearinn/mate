@@ -108,3 +108,8 @@
   border-style: solid;
   border-width: 2px;
 }
+
+.mate_unselectable {
+  opacity: 0.7 !important;
+  cursor: default;
+}

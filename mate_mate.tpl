@@ -29,9 +29,9 @@
   </div>
 </div>
 
-  <div id="myhand_wrap" class="whiteblock">
+  <div id="mate_myhand_wrap" class="whiteblock">
     <h3>{MY_HAND}</h3>
-    <div id="myhand"></div>
+    <div id="mate_myhand"></div>
   </div>
 
   <script type="text/javascript">
