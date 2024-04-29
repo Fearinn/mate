@@ -24,6 +24,8 @@ define([
 ], function (dojo, declare) {
   return declare("bgagame.mate", ebg.core.gamegui, {
     constructor: function () {
+      this.gameVersion = 0;
+
       this.cardWidth = 72;
       this.cardHeight = 96;
       this.historyQtd = 0;
@@ -36,6 +38,8 @@ define([
     },
 
     setup: function (gamedatas) {
+      this.gameVersion = gamedatas.gameVersion;
+
       this.playerHand = new ebg.stock();
 
       this.playerHand.create(
@@ -230,6 +234,7 @@ define([
               id: card_id,
               order: 10 - length + 1,
               lock: true,
+              gameVersion: this.gameVersion,
             },
             this,
             function (result) {},

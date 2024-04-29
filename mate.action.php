@@ -37,10 +37,16 @@ class action_mate extends APP_GameAction
     }
   }
 
+  private function checkVersion()
+  {
+    $clientVersion = (int) $this->getArg('gameVersion', AT_int, false);
+    $this->game->checkVersion($clientVersion);
+  }
 
   public function playCard()
   {
     $this->setAjaxMode();
+    $this->checkVersion();
     $card_id = $this->getArg("id", AT_posint, true);
     $card_order = $this->getArg('order', AT_int, true);
     $this->game->playCard($card_id, $card_order);
