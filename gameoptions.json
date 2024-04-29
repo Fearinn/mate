@@ -28,7 +28,7 @@
       },
       "1": {
         "name": "On",
-        "description": "Once during each round, either player X or player Y (whoever uses it first) can ignore the privilege rule.",
+        "description": "Once during each hand, either player X or player Y (whoever uses it first) can ignore the privilege rule.",
         "tmdisplay": "Free move"
       }
     }

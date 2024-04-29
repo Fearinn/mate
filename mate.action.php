@@ -46,7 +46,7 @@ class action_mate extends APP_GameAction
   public function playCard()
   {
     $this->setAjaxMode();
-    // $this->checkVersion();
+    $this->checkVersion();
     $card_id = $this->getArg("id", AT_posint, true);
     $card_order = $this->getArg('order', AT_int, true);
     $this->game->playCard($card_id, $card_order);
@@ -56,8 +56,15 @@ class action_mate extends APP_GameAction
   public function freeMove()
   {
     $this->setAjaxMode();
-    // $this->checkVersion();
+    $this->checkVersion();
     $this->game->freeMove();
+    $this->ajaxResponse();
+  }
+
+  public function cancelFreeMove()
+  {
+    $this->setAjaxMode();
+    $this->game->cancelFreeMove();
     $this->ajaxResponse();
   }
 }

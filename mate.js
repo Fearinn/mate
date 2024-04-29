@@ -122,13 +122,36 @@ define([
 
     onEnteringState: function (stateName, args) {
       if (stateName === "playerTurn") {
+        var freeMoveAvailable = args.args.freeMoveAvailable;
+        var freeMoveTurn = args.args.freeMoveTurn;
         if (this.isCurrentPlayerActive()) {
-          if (args.args.freeMoveAvailable) {
-            this.addActionButton("mate_freeMove", _("Free move"), "onFreeMove");
-          }
-
           var player_id = this.player_id;
           var playableCards = args.args.playableCards[player_id];
+          var playableWithFreeMove = args.args.playableWithFreeMove[player_id];
+
+          if (freeMoveAvailable) {
+            this.addActionButton("mate_freeMove", _("Free Move"), "onFreeMove");
+          }
+
+          if (freeMoveTurn) {
+            this.addActionButton(
+              "mate_cancelFreeMove",
+              _("Cancel Free Move"),
+              "onCancelFreeMove",
+              null,
+              null,
+              "red"
+            );
+
+            dojo.query(".stockitem").forEach((element) => {
+              var itemId = element.id.split("item_")[1];
+              if (!playableWithFreeMove[itemId]) {
+                dojo.addClass(element, "mate_unselectable");
+              }
+            });
+
+            return;
+          }
 
           dojo.query(".stockitem").forEach((element) => {
             var itemId = element.id.split("item_")[1];
@@ -253,11 +276,18 @@ define([
       this.sendAjaxCall(action, {});
     },
 
+    onCancelFreeMove() {
+      var action = "cancelFreeMove";
+      this.sendAjaxCall(action, {});
+    },
+
     ///////////////////////////////////////////////////
     //// Reaction to cometD notifications
 
     setupNotifications: function () {
       dojo.subscribe("playCard", this, "notif_playCard");
+      dojo.subscribe("freeMove", this, "notif_freeMove");
+      dojo.subscribe("cancelFreeMove", this, "notif_cancelFreeMove");
       dojo.subscribe("trickWin", this, "notif_trickWin");
       this.notifqueue.setSynchronous("trickWin", 1000);
       dojo.subscribe("newTrick", this, "notif_newTrick");
@@ -299,6 +329,9 @@ define([
         notif.args.card_id
       );
     },
+
+    notif_freeMove: function (notif) {},
+    notif_cancelFreeMove: function (notif) {},
 
     notif_trickWin: function (notif) {},
 
