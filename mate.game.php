@@ -32,7 +32,10 @@ class Mate extends Table
             "trickValue" => 12,
             "handsPlayed" => 13,
             "firstPlayer" => 14,
+            "freeMove" => 15,
+
             "privilege" => 100,
+            "freeMoveOption" => 101,
         ));
 
         $this->cards = $this->getNew("module.common.deck");
@@ -66,6 +69,7 @@ class Mate extends Table
         $this->setGameStateInitialValue('trickValue', 0);
         $this->setGameStateInitialValue('handsPlayed', 0);
         $this->setGameStateInitialValue('firstPlayer', 0);
+        $this->setGameStateInitialValue("freeMove", 0);
 
         $this->initStat("table", "tricks_number", 0);
         $this->initStat("table", "fewer_tricks_mate", 0);
@@ -143,9 +147,7 @@ class Mate extends Table
         $currentTrickSuit = $this->getGameStateValue('trickSuit');
         $currentTrickValue = $this->getGameStateValue('trickValue');
         $privilege = $this->getGameStateValue('privilege');
-
-        $this->warn($currentTrickSuit);
-        $this->warn($currentTrickValue);
+        $freeMove = $this->getGameStateValue("freeMove") == 1;
 
         $hand = $this->cards->getCardsInLocation('hand', $player_id);
 
@@ -155,6 +157,7 @@ class Mate extends Table
 
         if ($currentTrickSuit && $currentTrickValue && $currentCard) {
             $same_suit = false;
+            $same_value = false;
             $k_in_hand = false;
             $q_in_hand = false;
 
@@ -168,6 +171,10 @@ class Mate extends Table
                     $same_suit = true;
                 }
 
+                if ($currentTrickValue == $card["type_arg"]) {
+                    $same_value = true;
+                }
+
                 if ($card['type_arg'] == 12) {
                     $q_in_hand = true;
                 }
@@ -175,26 +182,41 @@ class Mate extends Table
                 if ($card['type_arg'] == 13) {
                     $k_in_hand = true;
                 }
-
-                if ($same_suit && $q_in_hand && $k_in_hand) {
-                    break;
-                }
             }
 
             if (($privilege == 1 || $privilege == 2) && $k_in_hand && $currentTrickValue == 13 && $currentCard['type_arg'] != 13) {
-                return $this->_("You must play a K card");
+                if ($freeMove && !$same_suit) {
+                    return $this->_("You must play a card of the current suit");
+                }
+
+                if (!$freeMove || !$same_suit) {
+                    return $this->_("You must play a K card");
+                }
             }
 
             if ($privilege == 2 && $q_in_hand && $currentTrickValue == 12 && $currentCard['type_arg'] != 12) {
-                return $this->_("You must play a Q card");
+                if ($freeMove && !$same_suit) {
+                    return $this->_("You must play a card of the current suit");
+                }
+
+                if (!$freeMove || !$same_suit) {
+                    return $this->_("You must play a Q card");
+                }
             }
 
             if (
-                $same_suit && $currentCard['type'] != $currentTrickSuit
+                $same_suit
+                && $currentCard['type'] != $currentTrickSuit
                 && !($currentTrickValue == 13 && $currentCard['type_arg'] == 13 && ($privilege == 1 || $privilege == 2))
                 && !($currentTrickValue == 12 && $currentCard['type_arg'] == 12 && $privilege == 2)
             ) {
-                return $this->_("You must play a card of the current suit");
+                if ($freeMove && !$same_value) {
+                    return $this->_("You must play a card of the current value");
+                }
+
+                if (!$freeMove) {
+                    return $this->_("You must play a card of the current suit");
+                }
             }
         }
 
@@ -241,7 +263,6 @@ class Mate extends Table
 
         $currentTrickSuit = $this->getGameStateValue('trickSuit');
         $currentTrickValue = $this->getGameStateValue('trickValue');
-        $privilege = $this->getGameStateValue('privilege');
 
         $cant_play = $this->cantPlayCard($card_id, $player_id);
         if ($cant_play) {
@@ -268,9 +289,35 @@ class Mate extends Table
 
         $this->DbQuery("UPDATE card SET card_order=$order WHERE card_id='$card_id'");
 
+        if ($this->getGameStateValue("freeMove") == 1) {
+            $this->setGameStateValue("freeMove", 2);
+        }
+
         $this->gamestate->nextState('playCard');
     }
 
+    function freeMove()
+    {
+        $this->checkAction("freeMove");
+
+        if ($this->getGameStateValue("freeMoveOption") == 0) {
+            throw new BgaVisibleSystemException("The free move is disabled");
+        }
+
+        if ($this->getGameStateValue("freeMove") == 2) {
+            throw new BgaVisibleSystemException("A free move has already been used");
+        }
+
+        $this->notifyAllPlayers(
+            "freeMove",
+            clienttranslate('${player_name} announces a free move'),
+            array("player_name" => $this->getActivePlayerName())
+        );
+
+        $this->setGameStateValue("freeMove", 1);
+
+        $this->gamestate->nextState("freeMove");
+    }
 
     //////////////////////////////////////////////////////////////////////////////
     //////////// Game state arguments
@@ -278,7 +325,17 @@ class Mate extends Table
 
     function argPlayerTurn()
     {
-        return array("playableCards" => $this->getPlayableCards());
+        $freeMove = $this->getGameStateValue("freeMove");
+
+        $freeMoveAvailable = $freeMove == 0
+            && $this->getGameStateValue("freeMoveOption") == 1
+            && $this->getGameStateValue("trickSuit") > 0;
+
+        return array(
+            "playableCards" => $this->getPlayableCards(),
+            "freeMoveAvailable" => $freeMoveAvailable,
+            "freeMoveTurn" => $freeMove == 1
+        );
     }
 
     //////////////////////////////////////////////////////////////////////////////
@@ -312,6 +369,8 @@ class Mate extends Table
     function stNewRound()
     {
         $players = $this->loadPlayersBasicInfos();
+
+        $this->setGameStateValue("freeMove", 0);
 
         $this->cards->moveAllCardsInLocation('hand', 'deck');
         $this->cards->moveAllCardsInLocation('cardswon', 'deck');

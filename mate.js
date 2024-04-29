@@ -123,6 +123,10 @@ define([
     onEnteringState: function (stateName, args) {
       if (stateName === "playerTurn") {
         if (this.isCurrentPlayerActive()) {
+          if (args.args.freeMoveAvailable) {
+            this.addActionButton("mate_freeMove", _("Free move"), "onFreeMove");
+          }
+
           var player_id = this.player_id;
           var playableCards = args.args.playableCards[player_id];
 
@@ -154,6 +158,25 @@ define([
 
     ///////////////////////////////////////////////////
     //// Utility methods
+
+    sendAjaxCall(action, args) {
+      args.lock = true;
+      args.gameVersion = this.gameVersion;
+
+      if (this.checkAction(action)) {
+        this.ajaxcall(
+          "/" + this.game_name + "/" + this.game_name + "/" + action + ".html",
+          args,
+          this,
+          function (result) {},
+          function (is_error) {}
+        );
+
+        this.playerHand.unselectAll();
+      } else {
+        this.playerHand.unselectAll();
+      }
+    },
 
     getCardUniqueId: function (suit, value) {
       return (suit - 1) * 13 + (value - 2);
@@ -220,32 +243,14 @@ define([
 
       if (items.length > 0) {
         var action = "playCard";
-        if (this.checkAction(action)) {
-          var card_id = items[0].id;
-          this.ajaxcall(
-            "/" +
-              this.game_name +
-              "/" +
-              this.game_name +
-              "/" +
-              action +
-              ".html",
-            {
-              id: card_id,
-              order: 10 - length + 1,
-              lock: true,
-              gameVersion: this.gameVersion,
-            },
-            this,
-            function (result) {},
-            function (is_error) {}
-          );
-
-          this.playerHand.unselectAll();
-        } else {
-          this.playerHand.unselectAll();
-        }
+        var card_id = items[0].id;
+        this.sendAjaxCall(action, { id: card_id, order: 10 - length + 1 });
       }
+    },
+
+    onFreeMove() {
+      var action = "freeMove";
+      this.sendAjaxCall(action, {});
     },
 
     ///////////////////////////////////////////////////

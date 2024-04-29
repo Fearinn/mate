@@ -3,8 +3,8 @@
     "name": "Privilege",
     "values": {
       "0": {
-        "name": "None",
-        "description": "The second player of the trick must always play a card of the current suit, if possible. This is the default."
+        "name": "None (suit privilege)",
+        "description": "The second player of the trick must always play a card of the current suit, if possible. Otherwise, they must play a card of the current value. This is the default."
       },
       "1": {
         "name": "King's privilege",
@@ -15,6 +15,21 @@
         "name": "Figure privilege",
         "description": "When a player plays a figure (King/Queen), the other player must follow with the same figure (King/Queen), if possible. Otherwise, they must play a card of the current suit.",
         "nobeginner": true
+      }
+    }
+  },
+  "101": {
+    "name": "Free move",
+    "values": {
+      "0": {
+        "name": "Off",
+        "description": "Players must always follow the privilege rule",
+        "tmdisplay": ""
+      },
+      "1": {
+        "name": "On",
+        "description": "Once during each round, either player X or player Y (whoever uses it first) can ignore the privilege rule.",
+        "tmdisplay": "Free move"
       }
     }
   }
