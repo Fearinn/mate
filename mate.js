@@ -121,7 +121,6 @@ define([
         if (this.isCurrentPlayerActive()) {
           var player_id = this.player_id;
           var playableCards = args.args.playableCards[player_id];
-          var hand = this.playerHand.getAllItems();
 
           dojo.query(".stockitem").forEach((element) => {
             var itemId = element.id.split("item_")[1];
@@ -129,7 +128,10 @@ define([
               dojo.addClass(element, "mate_unselectable");
             }
           });
+          return;
         }
+
+        dojo.query(".stockitem").addClass("mate_unselectable");
       }
     },
 
