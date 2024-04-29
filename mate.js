@@ -214,7 +214,7 @@ define([
 
       if (items.length > 0) {
         var action = "playCard";
-        if (this.checkAction(action, true)) {
+        if (this.checkAction(action)) {
           var card_id = items[0].id;
           this.ajaxcall(
             "/" +
