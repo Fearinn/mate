@@ -106,16 +106,13 @@ class Mate extends Table
 
         $players = $this->loadPlayersBasicInfos();
 
-        $sql = "SELECT player_id id, player_score score FROM player ";
-        $result['players'] = $this->getCollectionFromDb($sql);
-
+        $result['players'] = $this->getCollectionFromDb("SELECT player_id id, player_score score FROM player");
         $result['hand'] = $this->cards->getCardsInLocation('hand', $current_player_id);
-
         $result['cardsontable'] = $this->cards->getCardsInLocation('cardsontable');
+        $result['gameVersion'] = intval($this->gamestate->table_globals[300]);
 
         foreach ($players as $player_id => $info) {
-            $sql = "SELECT card_order, card_location, card_location_arg, card_type, card_type_arg FROM card WHERE card_location_arg='$player_id' AND card_location='cardswon'";
-            $result['cardswon'][$player_id] = $this->getCollectionFromDb($sql);
+            $result['cardswon'][$player_id] = $this->getCollectionFromDb("SELECT card_order, card_location, card_location_arg, card_type, card_type_arg FROM card WHERE card_location_arg='$player_id' AND card_location='cardswon'");
         }
 
         return $result;
