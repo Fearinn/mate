@@ -293,7 +293,9 @@ class Mate extends Table
 
         $playable_cards = $this->getPlayableCards()[$player_id];
 
-        if ($this->getGameStateValue("freeMove") == 1 && in_array($card_id, array_keys($playable_cards))) {
+        $freeMove = $this->getGameStateValue("freeMove");
+
+        if ($freeMove == 1 && in_array($card_id, array_keys($playable_cards))) {
             throw new BgaUserException($this->_("You don't need the free move to play this card. Cancel it first"));
         }
 
@@ -309,6 +311,14 @@ class Mate extends Table
         }
 
         $this->cards->moveCard($card_id, 'cardsontable', $player_id);
+
+        if ($freeMove == 1) {
+            $this->notifyAllPlayers(
+                "freeMove",
+                clienttranslate('${player_name} uses the free move'),
+                array("player_name" => $this->getCurrentPlayerName())
+            );
+        }
 
         $this->notifyAllPlayers('playCard', clienttranslate('${player_name} plays ${value_displayed} ${suit_displayed}'), array(
             'i18n' => array('suit_displayed', 'value_displayed'),
@@ -344,7 +354,7 @@ class Mate extends Table
 
         $this->notifyAllPlayers(
             "freeMove",
-            clienttranslate('${player_name} announces a free move'),
+            "",
             array("player_name" => $this->getActivePlayerName())
         );
 
@@ -373,7 +383,7 @@ class Mate extends Table
 
         $this->notifyAllPlayers(
             "cancelFreeMove",
-            clienttranslate('${player_name} cancels the free move'),
+            "",
             array("player_name" => $this->getActivePlayerName())
         );
 
@@ -425,7 +435,7 @@ class Mate extends Table
                 $this->cards->moveAllCardsInLocation('temporary', 'hand', $player_id, $player_id);
 
                 $cards = $this->cards->getPlayerHand($player_id);
-                $this->notifyPlayer($player_id, 'newHand', clienttranslate('A new hand starts. Players exchange hands.'), array('cards' => $cards));
+                $this->notifyPlayer($player_id, 'newHand', clienttranslate('A new hand starts. Players exchange hands'), array('cards' => $cards));
             }
         }
 
@@ -445,7 +455,7 @@ class Mate extends Table
 
         foreach ($players as $player_id => $player) {
             $cards = $this->cards->pickCards(10, 'deck', $player_id);
-            $this->notifyPlayer($player_id, 'newHand', clienttranslate('A new round starts. Cards are shuffled and dealt again.'), array('cards' => $cards));
+            $this->notifyPlayer($player_id, 'newHand', clienttranslate('A new round starts. Cards are shuffled and dealt again'), array('cards' => $cards));
         }
 
         $this->gamestate->nextState("");
@@ -592,7 +602,7 @@ class Mate extends Table
 
             $sql = "UPDATE player SET player_score=player_score+$points WHERE player_id='$winner_id'";
             $this->DbQuery($sql);
-            $this->notifyAllPlayers("points", clienttranslate('${player_name} mates with a ${card} after ${tricks} tricks, scoring ${points} points!'), array(
+            $this->notifyAllPlayers("points", clienttranslate('${player_name} mates with a ${card} after ${tricks} tricks. ${points} points scored'), array(
                 'player_id' => $winner_id, 'player_name' => $players[$winner_id]['player_name'],
                 'player_color' => $players[$winner_id]['player_color'],
                 'card' => $this->values_label[$checkmate_card['type_arg']],
@@ -608,7 +618,7 @@ class Mate extends Table
 
             $this->notifyAllPlayers("newScores", '', array('player_id' => $winner_id, 'newScores' => $score));
         } else {
-            $this->notifyAllPlayers("points", clienttranslate('Hand finished with no mate!'), array());
+            $this->notifyAllPlayers("points", clienttranslate('Hand finished with no mate'), array());
         }
 
         $prev_hands_played = $this->getGameStateValue('handsPlayed');
