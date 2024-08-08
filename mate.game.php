@@ -148,6 +148,10 @@ class Mate extends Table
 
         $hand = $this->cards->getCardsInLocation('hand', $player_id);
 
+        if (!key_exists($card_id, $hand)) {
+            return $this->_("You can't play this card now");
+        }
+
         if (!$currentTrickSuit || !$currentTrickValue) {
             return false;
         }
