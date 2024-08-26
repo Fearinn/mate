@@ -62,6 +62,7 @@
 .mate_playertable {
   text-align: center;
   height: 110px;
+  min-width: 100px;
 }
 
 .mate_playertablecard {
