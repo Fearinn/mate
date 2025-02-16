@@ -83,6 +83,10 @@ define([
         );
       }
 
+      if (this.isSpectator) {
+        document.getElementById("mate_myhand_wrap").remove(); 
+      }
+
       // Cards played on table
       for (i in this.gamedatas.cardsontable) {
         var card = this.gamedatas.cardsontable[i];
