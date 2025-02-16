@@ -15,15 +15,6 @@ $gameinfos = array(
     // Name of the game in English (will serve as the basis for translation) 
     'game_name' => "Mate",
 
-    // Game designer (or game designers, separated by commas)
-    'designer' => 'G. Capellen',
-
-    // Game artist (or game artists, separated by commas)
-    'artist' => '',
-
-    // Year of FIRST publication of this game. Can be negative.
-    'year' => 1915,
-
     // Game publisher (use empty string if there is no publisher)
     'publisher' => '',
 
@@ -87,20 +78,8 @@ $gameinfos = array(
     // NB: the default will be the first language in this list spoken by the player, so you should list them by popularity/preference.
     'language_dependency' => false,
 
-    // Complexity of the game, from 0 (extremely simple) to 5 (extremely complex)
-    'complexity' => 2.4,
-
-    // Luck of the game, from 0 (absolutely no luck in this game) to 5 (totally luck driven)
-    'luck' => 1,
-
-    // Strategy of the game, from 0 (no strategy can be setup) to 5 (totally based on strategy)
-    'strategy' => 4,
-
-    // Diplomacy of the game, from 0 (no interaction in this game) to 5 (totally based on interaction and discussion between players)
-    'diplomacy' => 0,
-
     // Colors attributed to players
-    'player_colors' => array("ff0000", "008000", "0000ff", "ffa500", "773300"),
+    'player_colors' => array("ff0000", "000000"),
 
     // Favorite colors support : if set to "true", support attribution of favorite colors based on player's preferences (see reattributeColorsBasedOnPreferences PHP method)
     // NB: this parameter is used only to flag games supporting this feature; you must use (or not use) reattributeColorsBasedOnPreferences PHP method to actually enable or disable the feature.
@@ -131,23 +110,4 @@ $gameinfos = array(
     // Short game presentation text that will appear on the game description page, structured as an array of paragraphs.
     // Each paragraph must be wrapped with totranslate() for translation and should not contain html (plain text without formatting).
     // A good length for this text is between 100 and 150 words (about 6 to 9 lines on a standard display)
-    'presentation' => array(
-        //    totranslate("This wonderful game is about geometric shapes!"),
-        //    totranslate("It was awarded best triangle game of the year in 2005 and nominated for the Spiel des Jahres."),
-        //    ...
-
-        totranslate("Mate is a classic game of perfect information played with a 20 card deck."),
-        totranslate("The goal is to force a 'mate', a move that leaves no playable card in your opponent's hand."),
-        totranslate("The more tricks played before the mate, more points you score. Find the perfect moment to finish your opponent, or defend yourself from the worst scenario!")
-    ),
-
-    //////// BGA SANDBOX ONLY PARAMETERS (DO NOT MODIFY)
-
-    // simple : A plays, B plays, C plays, A plays, B plays, ...
-    // circuit : A plays and choose the next player C, C plays and choose the next player D, ...
-    // complex : A+B+C plays and says that the next player is A+B
-    'is_sandbox' => false,
-    'turnControl' => 'simple'
-
-    ////////
 );
