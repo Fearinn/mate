@@ -23,8 +23,10 @@ define([
   "ebg/stock",
 ], function (dojo, declare) {
   return declare("bgagame.mate", ebg.core.gamegui, {
-    constructor: function () {
-      this.gameVersion = 0;
+    constructor: function () {},
+
+    setup: function (gamedatas) {
+      this.gameVersion = gamedatas.gameVersion;
 
       this.cardWidth = 72;
       this.cardHeight = 96;
@@ -35,10 +37,6 @@ define([
         3: 4,
         4: 1,
       };
-    },
-
-    setup: function (gamedatas) {
-      this.gameVersion = gamedatas.gameVersion;
 
       this.playerHand = new ebg.stock();
 
@@ -49,6 +47,7 @@ define([
         this.cardHeight
       );
 
+      this.playerHand.setSelectionAppearance("class");
       this.playerHand.image_items_per_row = 13;
 
       for (var suit = 1; suit <= 4; suit++) {
@@ -84,7 +83,7 @@ define([
       }
 
       if (this.isSpectator) {
-        document.getElementById("mate_myhand_wrap").remove(); 
+        document.getElementById("mate_myhand_wrap").remove();
       }
 
       // Cards played on table
@@ -114,10 +113,6 @@ define([
         "onPlayerHandSelectionChanged"
       );
 
-      for (player_id in this.gamedatas.players) {
-        var player = this.gamedatas.players[player_id];
-      }
-
       this.setupNotifications();
     },
 
@@ -132,6 +127,8 @@ define([
           var player_id = this.player_id;
           var playableCards = args.args.playableCards[player_id];
           var playableWithFreeMove = args.args.playableWithFreeMove[player_id];
+
+          this.playerHand.setSelectionMode(1);
 
           if (freeMoveAvailable) {
             this.addActionButton("mate_freeMove", _("Free Move"), "onFreeMove");
@@ -172,6 +169,7 @@ define([
 
     onLeavingState: function (stateName) {
       if (stateName === "playerTurn") {
+        this.playerHand.setSelectionMode(0);
         dojo.query(".stockitem").removeClass("mate_unselectable");
       }
     },
@@ -186,23 +184,11 @@ define([
     ///////////////////////////////////////////////////
     //// Utility methods
 
-    sendAjaxCall(action, args) {
-      args.lock = true;
+    performAction: function (action, args) {
       args.gameVersion = this.gameVersion;
 
-      if (this.checkAction(action)) {
-        this.ajaxcall(
-          "/" + this.game_name + "/" + this.game_name + "/" + action + ".html",
-          args,
-          this,
-          function (result) {},
-          function (is_error) {}
-        );
-
-        this.playerHand.unselectAll();
-      } else {
-        this.playerHand.unselectAll();
-      }
+      this.bgaPerformAction(action, args);
+      this.playerHand.unselectAll();
     },
 
     getCardUniqueId: function (suit, value) {
@@ -265,24 +251,33 @@ define([
     //// Player's action
 
     onPlayerHandSelectionChanged: function () {
+      document.getElementById("mate_playCardBtn")?.remove();
+      
       var items = this.playerHand.getSelectedItems();
       var length = this.playerHand.count();
 
       if (items.length > 0) {
         var action = "playCard";
         var card_id = items[0].id;
-        this.sendAjaxCall(action, { id: card_id, order: 10 - length + 1 });
+
+        this.statusBar.addActionButton(
+          _("Play card"),
+          () => {
+            this.performAction(action, { id: card_id, order: 10 - length + 1 });
+          },
+          { id: "mate_playCardBtn" }
+        );
       }
     },
 
     onFreeMove() {
       var action = "freeMove";
-      this.sendAjaxCall(action, {});
+      this.performAction(action, {});
     },
 
     onCancelFreeMove() {
       var action = "cancelFreeMove";
-      this.sendAjaxCall(action, {});
+      this.performAction(action, {});
     },
 
     ///////////////////////////////////////////////////

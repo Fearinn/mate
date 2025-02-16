@@ -558,9 +558,9 @@ class Mate extends Table
 
             $players = $this->loadPlayersBasicInfos();
 
-            $this->notifyAllPlayers('trickWin', clienttranslate('${best_player_name} wins the trick'), array(
-                'best_player_id' => $best_value_player_id,
-                'best_player_name' => $players[$best_value_player_id]['player_name'],
+            $this->notifyAllPlayers('trickWin', clienttranslate('${player_name} wins the trick'), array(
+                'player_id' => $best_value_player_id,
+                'player_name' => $players[$best_value_player_id]['player_name'],
             ));
 
             if ($this->cards->countCardInLocation('hand') == 0) {
