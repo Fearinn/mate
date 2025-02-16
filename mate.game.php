@@ -274,7 +274,7 @@ class Mate extends Table
 
     function getOtherPlayer($players, $player_id)
     {
-        $filtered_players = array_filter($players, fn ($other_player) =>
+        $filtered_players = array_filter($players, fn($other_player) =>
         $player_id != $other_player, ARRAY_FILTER_USE_KEY);
         $ids = array_keys($filtered_players);
 
@@ -318,7 +318,7 @@ class Mate extends Table
 
         if ($freeMove == 1) {
             $this->notifyAllPlayers(
-                "freeMove",
+                "message",
                 clienttranslate('${player_name} uses the free move'),
                 array("player_name" => $this->getCurrentPlayerName())
             );
@@ -385,14 +385,7 @@ class Mate extends Table
             throw new BgaVisibleSystemException("A free move has already been used");
         }
 
-        $this->notifyAllPlayers(
-            "cancelFreeMove",
-            "",
-            array("player_name" => $this->getActivePlayerName())
-        );
-
         $this->setGameStateValue("freeMove", 0);
-
         $this->gamestate->nextState("freeMove");
     }
 
@@ -556,12 +549,14 @@ class Mate extends Table
 
             $this->incStat(1, "tricks_won", $best_value_player_id);
 
-            $players = $this->loadPlayersBasicInfos();
-
-            $this->notifyAllPlayers('trickWin', clienttranslate('${player_name} wins the trick'), array(
-                'player_id' => $best_value_player_id,
-                'player_name' => $players[$best_value_player_id]['player_name'],
-            ));
+            $this->notifyAllPlayers(
+                "trickWin",
+                clienttranslate('${player_name} wins the trick'),
+                array(
+                    'player_id' => $best_value_player_id,
+                    'player_name' => $this->getPlayerNameById($best_value_player_id),
+                )
+            );
 
             if ($this->cards->countCardInLocation('hand') == 0) {
                 $this->gamestate->nextState("endHand");
@@ -607,7 +602,8 @@ class Mate extends Table
             $sql = "UPDATE player SET player_score=player_score+$points WHERE player_id='$winner_id'";
             $this->DbQuery($sql);
             $this->notifyAllPlayers("points", clienttranslate('${player_name} mates with a ${card} after ${tricks} tricks. ${points} points scored'), array(
-                'player_id' => $winner_id, 'player_name' => $players[$winner_id]['player_name'],
+                'player_id' => $winner_id,
+                'player_name' => $players[$winner_id]['player_name'],
                 'player_color' => $players[$winner_id]['player_color'],
                 'card' => $this->values_label[$checkmate_card['type_arg']],
                 'tricks' => $trick_nbr,

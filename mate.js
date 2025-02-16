@@ -231,6 +231,8 @@ define([
 
       var trick_num = order || Math.ceil(this.historyQtd / 2);
 
+      const cardContainerId = "mate_historycard_" + player_id + "_" + trick_num;
+
       dojo.place(
         this.format_block("jstpl_cardonhistory", {
           x: this.cardWidth * (value - 2),
@@ -238,13 +240,13 @@ define([
           player_id: player_id,
           num: trick_num,
         }),
-        "mate_historycard_" + player_id + "_" + trick_num
+        cardContainerId
       );
 
-      this.slideToObject(
-        "mate_cardonhistory_" + player_id + "_" + trick_num,
-        "mate_historycard_" + player_id + "_" + trick_num
-      ).play();
+      const cardElementId = "mate_cardonhistory_" + player_id + "_" + trick_num;
+
+      this.placeOnObject(cardElementId, "mate_playertablecard_" + player_id);
+      this.slideToObject(cardElementId, cardContainerId, 1000).play();
     },
 
     ///////////////////////////////////////////////////
@@ -252,7 +254,7 @@ define([
 
     onPlayerHandSelectionChanged: function () {
       document.getElementById("mate_playCardBtn")?.remove();
-      
+
       var items = this.playerHand.getSelectedItems();
       var length = this.playerHand.count();
 
@@ -284,19 +286,12 @@ define([
     //// Reaction to cometD notifications
 
     setupNotifications: function () {
-      dojo.subscribe("playCard", this, "notif_playCard");
-      dojo.subscribe("freeMove", this, "notif_freeMove");
-      dojo.subscribe("cancelFreeMove", this, "notif_cancelFreeMove");
-      dojo.subscribe("trickWin", this, "notif_trickWin");
-      this.notifqueue.setSynchronous("trickWin", 1000);
-      dojo.subscribe("newTrick", this, "notif_newTrick");
-      dojo.subscribe("newHand", this, "notif_newHand");
-      dojo.subscribe("newScores", this, "notif_newScores");
-      dojo.subscribe("points", this, "notif_points");
-      this.notifqueue.setSynchronous("points", 3000);
+      this.bgaSetupPromiseNotifications({
+        minDuration: 1000,
+      });
     },
 
-    notif_newHand: function (notif) {
+    notif_newHand: function (args) {
       this.playerHand.removeAll();
 
       for (var i in notif.args.cards) {
@@ -320,39 +315,27 @@ define([
       this.historyQtd = 0;
     },
 
-    notif_playCard: function (notif) {
-      this.playCardOnTable(
-        notif.args.player_id,
-        notif.args.suit,
-        notif.args.value,
-        notif.args.card_id
-      );
+    notif_playCard: function (args) {
+      this.playCardOnTable(args.player_id, args.suit, args.value, args.card_id);
     },
 
-    notif_freeMove: function (notif) {},
-    notif_cancelFreeMove: function (notif) {},
+    notif_trickWin: function (args) {},
 
-    notif_trickWin: function (notif) {},
+    notif_newTrick: function (args) {
+      this.moveCardToHistory(args.player_id, args.suit, args.value);
 
-    notif_newTrick: function (notif) {
-      this.moveCardToHistory(
-        notif.args.player_id,
-        notif.args.suit,
-        notif.args.value
-      );
-
-      dojo.destroy("mate_cardontable_" + notif.args.player_id);
+      dojo.destroy("mate_cardontable_" + args.player_id);
     },
 
-    notif_newScores: function (notif) {
-      this.scoreCtrl[notif.args.player_id].toValue(notif.args.newScores);
+    notif_newScores: function (args) {
+      this.scoreCtrl[args.player_id].toValue(args.newScores);
     },
 
-    notif_points: function (notif) {
+    notif_points: function (args) {
       this.displayScoring(
-        "mate_playertablecard_" + notif.args.player_id,
-        notif.args.player_color,
-        notif.args.points
+        "mate_playertablecard_" + args.player_id,
+        args.player_color,
+        args.points
       );
     },
   });
