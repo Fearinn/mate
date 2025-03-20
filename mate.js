@@ -294,8 +294,8 @@ define([
     notif_newHand: function (args) {
       this.playerHand.removeAll();
 
-      for (var i in notif.args.cards) {
-        var card = notif.args.cards[i];
+      for (var i in args.cards) {
+        var card = args.cards[i];
         var suit = card.type;
         var value = card.type_arg;
         this.playerHand.addToStockWithId(
