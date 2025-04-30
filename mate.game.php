@@ -98,7 +98,7 @@ class Mate extends Table
         /************ End of the game initialization *****/
     }
 
-    protected function getAllDatas()
+    protected function getAllDatas(): array
     {
         $result = array();
 
@@ -432,7 +432,12 @@ class Mate extends Table
                 $this->cards->moveAllCardsInLocation('temporary', 'hand', $player_id, $player_id);
 
                 $cards = $this->cards->getPlayerHand($player_id);
-                $this->notifyPlayer($player_id, 'newHand', clienttranslate('A new hand starts. Players exchange hands'), array('cards' => $cards));
+                $this->notifyPlayer(
+                    $player_id,
+                    'newHand',
+                    clienttranslate('A new hand starts. Players exchange hands'),
+                    array('cards' => $cards)
+                );
             }
         }
 
@@ -452,7 +457,12 @@ class Mate extends Table
 
         foreach ($players as $player_id => $player) {
             $cards = $this->cards->pickCards(10, 'deck', $player_id);
-            $this->notifyPlayer($player_id, 'newHand', clienttranslate('A new round starts. Cards are shuffled and dealt again'), array('cards' => $cards));
+            $this->notifyPlayer(
+                $player_id,
+                'newHand',
+                clienttranslate('A new round starts. Cards are shuffled and dealt again'),
+                array('cards' => $cards)
+            );
         }
 
         $this->gamestate->nextState("");
@@ -470,11 +480,15 @@ class Mate extends Table
 
                 $this->cards->moveAllCardsInLocation('cardsontable', 'cardswon', $player_id, $player_id);
 
-                $this->notifyAllPlayers('newTrick', '', array(
-                    'player_id' => $player_id,
-                    'suit' => $card['type'],
-                    'value' => $card['type_arg'],
-                ));
+                $this->notifyAllPlayers(
+                    'newTrick',
+                    '',
+                    array(
+                        'player_id' => $player_id,
+                        'suit' => $card['type'],
+                        'value' => $card['type_arg'],
+                    )
+                );
             }
         }
 
@@ -590,7 +604,6 @@ class Mate extends Table
         $points = $checkmate_weight * $trick_nbr;
 
         if ($points && $this->cards->countCardInLocation("hand") > 0) {
-
             if (!$this->getStat("fewer_tricks_mate") || $trick_nbr < $this->getStat("fewer_tricks_mate")) {
                 $this->setStat($trick_nbr, "fewer_tricks_mate");
             }
@@ -601,14 +614,18 @@ class Mate extends Table
 
             $sql = "UPDATE player SET player_score=player_score+$points WHERE player_id='$winner_id'";
             $this->DbQuery($sql);
-            $this->notifyAllPlayers("points", clienttranslate('${player_name} mates with a ${card} after ${tricks} tricks. ${points} points scored'), array(
-                'player_id' => $winner_id,
-                'player_name' => $players[$winner_id]['player_name'],
-                'player_color' => $players[$winner_id]['player_color'],
-                'card' => $this->values_label[$checkmate_card['type_arg']],
-                'tricks' => $trick_nbr,
-                'points' => $points,
-            ));
+            $this->notifyAllPlayers(
+                "points",
+                clienttranslate('${player_name} mates with a ${card} after ${tricks} tricks. ${points} points scored'),
+                array(
+                    'player_id' => $winner_id,
+                    'player_name' => $players[$winner_id]['player_name'],
+                    'player_color' => $players[$winner_id]['player_color'],
+                    'card' => $this->values_label[$checkmate_card['type_arg']],
+                    'tricks' => $trick_nbr,
+                    'points' => $points,
+                )
+            );
 
             $score = 0;
             $collection = $this->getCollectionFromDb("SELECT player_score FROM player WHERE player_id='$winner_id'");
@@ -616,9 +633,17 @@ class Mate extends Table
                 $score = $info['player_score'];
             }
 
-            $this->notifyAllPlayers("newScores", '', array('player_id' => $winner_id, 'newScores' => $score));
+            $this->notifyAllPlayers(
+                "newScores",
+                '',
+                array('player_id' => $winner_id, 'newScores' => $score)
+            );
         } else {
-            $this->notifyAllPlayers("points", clienttranslate('Hand finished with no mate'), array());
+            $this->notifyAllPlayers(
+                "message",
+                clienttranslate('Hand finished with no mate'),
+                array()
+            );
         }
 
         $prev_hands_played = $this->getGameStateValue('handsPlayed');
@@ -653,7 +678,7 @@ class Mate extends Table
     //////////// Zombie
     ////////////
 
-    function zombieTurn($state, $active_player)
+    function zombieTurn($state, $active_player): void
     {
         $statename = $state['name'];
 
@@ -728,7 +753,13 @@ class Mate extends Table
         //        // Please add your future database scheme changes here
         //
         //
+    }
 
-
+    public function debug_mate(): void {
+        $this->notifyAllPlayers(
+            "message",
+            clienttranslate('Hand finished with no mate'),
+            array()
+        );
     }
 }
