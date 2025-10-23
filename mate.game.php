@@ -258,7 +258,7 @@ class Mate extends Table
     {
         $playable_cards = array();
         foreach ($this->loadPlayersBasicInfos() as $player_id => $player) {
-            $playable_cards[$player_id] = null;
+            $playable_cards[$player_id] = [];
 
             $hand = $this->cards->getCardsInLocation("hand", $player_id);
 
@@ -363,7 +363,6 @@ class Mate extends Table
         );
 
         $this->setGameStateValue("freeMove", 1);
-
         $this->gamestate->nextState("freeMove");
     }
 

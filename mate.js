@@ -123,6 +123,7 @@ define([
       if (stateName === "playerTurn") {
         var freeMoveAvailable = args.args.freeMoveAvailable;
         var freeMoveTurn = args.args.freeMoveTurn;
+
         if (this.isCurrentPlayerActive()) {
           var player_id = this.player_id;
           var playableCards = args.args.playableCards[player_id];
@@ -130,7 +131,7 @@ define([
 
           this.playerHand.setSelectionMode(1);
 
-          if (freeMoveAvailable) {
+          if (freeMoveAvailable && Object.keys(playableWithFreeMove).length > 0) {
             this.addActionButton("mate_freeMove", _("Free Move"), "onFreeMove");
           }
 
